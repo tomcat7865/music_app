@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>PHYSICAL_MUSIC v1.0</title>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">PHYSICAL_MUSIC</div>
+        <nav>
+            <a href="/" class="nav-btn">Home</a>
+            <a href="/view_master" class="nav-btn">Library</a>
+            <a href="/control_panel" class="nav-btn">Control Panel</a>
+        </nav>
+    </div>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

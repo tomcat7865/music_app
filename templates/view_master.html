@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="search-section">
+    <h1>Explore Library</h1>
+    
+    <div class="search-controls">
+        <select id="album_select" onchange="fetchAlbum(this.value)">
+    	    <option value="">-- Select Album --</option>
+    	    {% for album in albums %}
+        	{# The value MUST be the numeric ID (e.g., 150) #}
+        	<option value="{{ album.id }}">{{ album.album_name }}</option>
+    	    {% endfor %}
+	</select>	
+
+        <input type="text" id="manual_id" placeholder="Manual ID" value="{{ result.id if result else '' }}">
+        <button onclick="searchManual()">Search</button>
+    </div>
+</div>
+
+<hr>
+
+{% if result %}
+<div class="master-details">
+    <h2>Master Release Details</h2>
+    <p><strong>MASTER ID:</strong> {{ result.id }}</p>
+    <p><strong>Artist:</strong> {{ result.artist }}</p>
+    <p><strong>Album:</strong> {{ result.album }}</p>
+    <p><strong>Label:</strong> {{ result.label }}</p>
+    <p><strong>Catalogue #:</strong> {{ result.catalogue_no }}</p>
+    <p><strong>Format:</strong> {{ result.format }}</p>
+    <p><strong>Location:</strong> {{ result.location }}</p>
+    <p><strong>This Release Year:</strong> {{ result.this_release_year }}</p>
+    <p><strong>Duration:</strong> {{ result.this_release_duration }}</p>
+</div>
+{% else %}
+    <p>Select an album or enter an ID to view details.</p>
+{% endif %}
+
+<script>
+function fetchAlbum(id) {
+    if (id) window.location.href = "/view_master?id=" + id;
+}
+
+function searchManual() {
+    const id = document.getElementById('manual_id').value;
+    if (id) window.location.href = "/view_master?id=" + id;
+}
+</script>
+{% endblock %}

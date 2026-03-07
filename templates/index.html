@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="welcome-section">
+    <h1>Welcome to Your Library</h1>
+    
+    <div class="status-bar">
+        <span class="pulse-icon">●</span>
+        <p>Connected to <strong>physical_music</strong></p>
+        <span class="count-badge">Managing {{ total_count }} Master Release Entries</span>
+    </div>
+
+    <div class="grid">
+        <a href="/view_master" class="card">
+            <div class="card-icon">💿</div>
+            <h3>View Master Release</h3>
+            <p>Search by Album name or Manual ID to view full release details and digital versions.</p>
+        </a>
+
+        <div class="card disabled">
+            <div class="card-icon">⚙️</div>
+            <h3>Control Panel</h3>
+            <p>Manage Lookup Tables and System Settings (Coming in Product 3).</p>
+        </div>
+
+        <div class="card disabled">
+            <div class="card-icon">📊</div>
+            <h3>Reports & Labels</h3>
+            <p>Generate Media Outer Labels and Collection Summaries (Coming in Product 4).</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
