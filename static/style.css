@@ -1,135 +1,124 @@
-:root {
-    --bg-color: #000000;
-    --sidebar-color: #121212;
-    --accent-color: #fa233b; /* Apple Music Red */
-    --text-main: #ffffff;
-    --text-secondary: #a0a0a0;
-    --card-bg: #1c1c1e;
-}
-
+/* Core Layout */
 body {
+    background-color: #121212;
+    color: #d1d1d1;
+    font-family: 'Inter', -apple-system, sans-serif;
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    display: flex;
-    height: 100vh;
-}
-
-.sidebar {
-    width: 260px;
-    background-color: var(--sidebar-color);
-    border-right: 1px solid #333;
     padding: 20px;
-    display: flex;
-    flex-direction: column;
 }
 
-.logo {
-    font-weight: 700;
-    font-size: 1.2rem;
-    margin-bottom: 30px;
-    color: var(--accent-color);
-}
-
-.nav-btn {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    text-align: left;
-    padding: 12px;
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 8px;
-    margin-bottom: 5px;
-    transition: 0.2s;
-}
-
-.nav-btn.active, .nav-btn:hover {
-    background-color: #2c2c2e;
-    color: var(--text-main);
-}
-
-main {
-    flex: 1;
-    padding: 40px;
-    overflow-y: auto;
-}
-
-.status-bar {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: #1c1c1e;
-    padding: 10px 20px;
-    border-radius: 50px;
-    margin-bottom: 40px;
-    width: fit-content;
-    border: 1px solid #38383a;
-}
-
-.pulse-icon {
-    color: #30d158; /* Apple Success Green */
-    font-size: 0.8rem;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.4; }
-    100% { opacity: 1; }
-}
-
-.count-badge {
-    background: var(--accent-color);
-    padding: 2px 10px;
+/* Container Widths - Optimized for 1920px */
+.search-section, .master-details, .dynamic-section {
+    max-width: 1850px; /* Slightly wider for the full 13 columns */
+    margin: 0 auto 20px auto;
+    background: #1e1e1e;
+    padding: 25px;
     border-radius: 4px;
-    font-size: 0.85rem;
-    font-weight: bold;
+    border: 1px solid #2d2d2d;
 }
 
-.card.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    filter: grayscale(1);
+h1, h2, h3 {
+    color: #ffffff;
+    margin-top: 0;
+    font-weight: 500;
 }
 
-h1 {
-    font-size: 2.5rem;
-    margin-bottom: 30px;
-}
-
-.grid {
+/* Master Details Grid */
+.details-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
 }
 
-.card {
-    background-color: var(--card-bg);
-    padding: 24px;
-    border-radius: 12px;
-    text-decoration: none;
-    color: inherit;
-    transition: transform 0.2s;
-    border: 1px solid transparent;
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #262626;
 }
 
-.card:hover {
-    transform: scale(1.02);
-    border-color: #444;
+.detail-label {
+    color: #666;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.card-icon {
-    font-size: 2rem;
-    margin-bottom: 15px;
+.detail-value {
+    color: #e0e0e0;
 }
 
-.card h3 {
-    margin: 0 0 10px 0;
+/* Tab Styling */
+.button-group {
+    display: flex;
+    gap: 2px;
+    background: #262626;
+    padding: 2px;
+    border-radius: 4px;
 }
 
-.card p {
-    color: var(--text-secondary);
-    margin: 0;
+.action-btn {
+    background: #1e1e1e;
+    color: #888;
+    border: none;
+    padding: 10px 24px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
 }
+
+.action-btn.active {
+    background: #3a3a3a;
+    color: #ffffff;
+}
+
+/* The 13-Column Table with Sticky Header */
+.table-container {
+    overflow-x: auto; /* Fallback for smaller windows */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.82rem;
+}
+
+th {
+    background-color: #262626;
+    color: #ffffff;
+    text-align: left;
+    padding: 12px 10px;
+    border-bottom: 2px solid #333;
+    font-weight: 500;
+    position: sticky;
+    top: 0; /* Keeps header visible while scrolling */
+}
+
+td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #262626;
+}
+
+/* Zebra Striping & Hover */
+tbody tr:nth-child(odd) { background-color: #1a1a1a; }
+tbody tr:hover { background-color: #252525; }
+
+/* Column Logic */
+th:nth-child(2), td:nth-child(2),
+th:nth-child(3), td:nth-child(3),
+th:nth-child(10), td:nth-child(10) {
+    text-align: center;
+}
+
+/* Handling the Comments column */
+td:last-child {
+    color: #888;
+    font-style: italic;
+    min-width: 250px;
+    max-width: 400px;
+    word-wrap: break-word;
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
