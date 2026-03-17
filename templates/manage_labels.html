@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="/control_panel" style="color: #888; text-decoration: none; font-size: 0.9rem;">
+        <i class="fas fa-arrow-left"></i> Back to Control Panel
+    </a>
+</div>
+
+<div class="search-section">
+    <h1><i class="fas fa-tag"></i> Label Manager</h1>
+    <p style="color: #888;">Manage your record labels lookup table below.</p>
+    
+    <div class="details-grid" style="margin-top: 20px;">
+        <div class="column">
+            <form method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label class="detail-label">Search Label Name (%LIKE%)</label>
+                    <div style="display: flex; gap: 10px; margin-top: 5px;">
+                        <input type="text" name="label_search" value="{{ search_query }}" placeholder="e.g. Harvest" style="flex-grow: 1; padding: 10px; background: #262626; color: white; border: 1px solid #444;">
+                        <button type="submit" style="padding: 10px 20px; cursor: pointer;">Search</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="detail-label">Full Label List</label>
+                    <select id="label-dropdown" onchange="selectFromDropdown()" style="width: 100%; margin-top: 5px; padding: 10px; background: #262626; color: white; border: 1px solid #444;">
+                        <option value="">-- Choose a Label --</option>
+                        {% for l in all_labels %}
+                            <option value="{{ l.id }}">{{ l.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <div class="column">
+            {% if search_results %}
+                <label class="detail-label">Search Results (Click to Edit):</label>
+                <div style="background: #262626; border-radius: 4px; max-height: 200px; overflow-y: auto; margin-top: 5px; border: 1px solid #3d3d3d;">
+                    {% for r in search_results %}
+                        <div onclick="selectLabel('{{ r.id }}', '{{ r.label }}')" 
+                             style="padding: 12px; border-bottom: 1px solid #333; cursor: pointer; color: #fff;"
+                             onmouseover="this.style.background='#333'" onmouseout="this.style.background='transparent'">
+                            {{ r.label }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="padding: 40px; text-align: center; color: #444; border: 2px dashed #2d2d2d; border-radius: 4px; margin-top: 5px;">
+                    <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                    Perform a search or use the dropdown to find a label
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="master-details" id="edit-section" style="margin-top: 20px;">
+    <h2 id="form-title">Add New Label</h2>
+    <form action="/control_panel/labels/save" method="POST">
+        <input type="hidden" id="label_id_field" name="label_id" value="">
+        
+        <div class="details-grid">
+            <div class="column">
+                <div class="detail-row" style="border: none;">
+                    <div class="detail-label">Label Name</div>
+                    <input type="text" id="label_name_field" name="label_name" style="width: 100%; padding: 10px; background: #262626; color: white; border: 1px solid #444;" required>
+                </div>
+            </div>
+            <div class="column" style="display: flex; align-items: flex-end; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="resetForm()" style="background: #444; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer;">Clear / New</button>
+                <button type="submit" style="background: #2e7d32; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer;">Save Label</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+function selectLabel(id, name) {
+    if(!id) return;
+    document.getElementById('label_id_field').value = id;
+    document.getElementById('label_name_field').value = name;
+    document.getElementById('form-title').innerText = "Modify Label: " + name;
+    document.getElementById('label-dropdown').value = id;
+    document.getElementById('edit-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function selectFromDropdown() {
+    const dropdown = document.getElementById('label-dropdown');
+    const id = dropdown.value;
+    const name = dropdown.options[dropdown.selectedIndex].text;
+    if (id && id !== "") {
+        selectLabel(id, name);
+    } else {
+        resetForm();
+    }
+}
+
+function resetForm() {
+    document.getElementById('label_id_field').value = "";
+    document.getElementById('label_name_field').value = "";
+    document.getElementById('label-dropdown').value = "";
+    document.getElementById('form-title').innerText = "Add New Label";
+}
+</script>
+{% endblock %}
