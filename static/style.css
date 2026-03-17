@@ -117,3 +117,9 @@ tbody tr:nth-child(odd) { background-color: #1a1a1a; }
 
 .tab-content { display: none; }
 .tab-content.active { display: block; }
+
+/* This ensures line breaks from the database are rendered in the browser */
+.note-box p, .detail-value {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}

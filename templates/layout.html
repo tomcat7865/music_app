@@ -6,6 +6,12 @@
     <title>Physical Music Archive</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .flash-messages { margin-bottom: 20px; }
+        .flash { padding: 15px; border-radius: 4px; margin-bottom: 10px; font-weight: bold; }
+        .success { background-color: #2e7d32; color: white; border: 1px solid #1b5e20; }
+        .danger { background-color: #c62828; color: white; border: 1px solid #b71c1c; }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -17,6 +23,16 @@
     </nav>
     
     <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
     </div>
 </body>

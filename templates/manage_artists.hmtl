@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="/" style="color: #888; text-decoration: none; font-size: 0.9rem;">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="search-section">
+    <h1><i class="fas fa-users"></i> Artist Manager</h1>
+    <p style="color: #888;">Search for an existing artist to modify or prepare to add a new one.</p>
+    
+    <div class="details-grid" style="margin-top: 20px;">
+        <div class="column">
+            <form method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label class="detail-label">Search Artist Name (%LIKE%)</label>
+                    <div style="display: flex; gap: 10px; margin-top: 5px;">
+                        <input type="text" name="artist_search" value="{{ search_query }}" placeholder="e.g. Parsons" style="flex-grow: 1;">
+                        <button type="submit">Search</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="detail-label">Or Select From Full List</label>
+                    <select onchange="selectArtist(this.value, this.options[this.selectedIndex].text)" style="width: 100%; margin-top: 5px;">
+                        <option value="">-- Select Artist --</option>
+                        {% for a in all_artists %}
+                            <option value="{{ a.id }}">{{ a.artist }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <div class="column">
+            {% if search_results %}
+                <label class="detail-label">Search Results Found:</label>
+                <div style="background: #262626; border-radius: 4px; max-height: 150px; overflow-y: auto; margin-top: 5px; border: 1px solid #3d3d3d;">
+                    {% for r in search_results %}
+                        <div onclick="selectArtist('{{ r.id }}', '{{ r.artist }}')" 
+                             style="padding: 10px; border-bottom: 1px solid #333; cursor: pointer; color: #fff;"
+                             onmouseover="this.style.background='#333'" onmouseout="this.style.background='transparent'">
+                            {{ r.artist }} (ID: {{ r.id }})
+                        </div>
+                    {% endfor %}
+                </div>
+            {% elif search_query %}
+                <p style="color: #ff6b6b; font-size: 0.9rem; margin-top: 25px;">No artists found matching "{{ search_query }}"</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="master-details" id="edit-section">
+    <h2 id="form-title">Add New Artist</h2>
+    <form action="/control_panel/artists/save" method="POST">
+        <input type="hidden" id="artist_id" name="artist_id" value="">
+        
+        <div class="details-grid">
+            <div class="column">
+                <div class="detail-row" style="border: none;">
+                    <div class="detail-label">Artist Name</div>
+                    <input type="text" id="artist_name" name="artist_name" style="width: 100%;" required>
+                </div>
+            </div>
+            <div class="column" style="display: flex; align-items: flex-end; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="resetForm()" style="background: #444;">Clear / New</button>
+                <button type="submit" style="background: #2e7d32; border-color: #1b5e20;">Save Artist</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+function selectArtist(id, name) {
+    if(!id) return;
+    document.getElementById('artist_id').value = id;
+    document.getElementById('artist_name').value = name;
+    document.getElementById('form-title').innerText = "Modify Artist (ID: " + id + ")";
+    document.getElementById('edit-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetForm() {
+    document.getElementById('artist_id').value = "";
+    document.getElementById('artist_name').value = "";
+    document.getElementById('form-title').innerText = "Add New Artist";
+}
+</script>
+{% endblock %}
