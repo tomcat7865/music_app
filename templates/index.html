@@ -1,33 +1,28 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="welcome-section">
-    <h1>Welcome to Your Library</h1>
-    
-    <div class="status-bar">
-        <span class="pulse-icon">●</span>
-        <p>Connected to <strong>physical_music</strong></p>
-        <span class="count-badge">Managing {{ total_count }} Master Release Entries</span>
-    </div>
+<div style="text-align: center; margin: 40px 0;">
+    <h1 style="font-size: 2.2rem; margin-bottom: 10px;">Music Archive Management</h1>
+    <p style="color: #666;">Select a module to begin library operations</p>
+</div>
 
-    <div class="grid">
-        <a href="/view_master" class="card">
-            <div class="card-icon">💿</div>
-            <h3>View Master Release</h3>
-            <p>Search by Album name or Manual ID to view full release details and digital versions.</p>
-        </a>
+<div class="landing-grid">
+    <a href="/view_master" class="nav-card">
+        <i class="fas fa-search-plus"></i>
+        <h2>VIEW MASTER RELEASE</h2>
+        <p>Explore library, view versions, and check history</p>
+    </a>
 
-        <div class="card disabled">
-            <div class="card-icon">⚙️</div>
-            <h3>Control Panel</h3>
-            <p>Manage Lookup Tables and System Settings (Coming in Product 3).</p>
-        </div>
+    <a href="#" class="nav-card">
+        <i class="fas fa-sliders-h"></i>
+        <h2>CONTROL PANEL</h2>
+        <p>Add new releases and log interactions</p>
+    </a>
 
-        <div class="card disabled">
-            <div class="card-icon">📊</div>
-            <h3>Reports & Labels</h3>
-            <p>Generate Media Outer Labels and Collection Summaries (Coming in Product 4).</p>
-        </div>
-    </div>
+    <a href="#" class="nav-card">
+        <i class="fas fa-file-invoice"></i>
+        <h2>REPORTS AND LABELS</h2>
+        <p>Generate lists and print disc labels</p>
+    </a>
 </div>
 {% endblock %}

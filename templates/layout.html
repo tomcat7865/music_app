@@ -3,49 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Physical Music Library</title>
+    <title>Physical Music Archive</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        /* Top Navigation Bar Styling */
-        nav {
-            background-color: #333;
-            padding: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 3px solid #000;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin-right: 20px;
-            font-weight: bold;
-        }
-        nav a:hover {
-            color: #ccc;
-        }
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-    </style>
 </head>
 <body>
-
-    <nav>
-        <div class="container">
-            <a href="/">Home</a>
-            <a href="/view_master">Explore Library</a>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="/" class="navbar-brand">
+                <i class="fas fa-compact-disc"></i> MUSIC ARCHIVE
+            </a>
         </div>
     </nav>
-
+    
     <div class="container">
         {% block content %}{% endblock %}
     </div>
-
-    <footer style="margin-top: 50px; text-align: center; color: #888; font-size: 0.8em;">
-        <hr>
-        <p>Physical Music Database &bull; Raspberry Pi &bull; 2026</p>
-    </footer>
-
 </body>
 </html>

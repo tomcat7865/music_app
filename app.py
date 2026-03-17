@@ -38,6 +38,7 @@ def view_master():
     albums = []
     result = None
     other_versions = []
+    interactions = []
     
     try:
         with conn.cursor() as cursor:
@@ -46,11 +47,19 @@ def view_master():
             albums = cursor.fetchall()
 
             if search_id:
+                # 1. Main Master Record Query
                 query = """
                     SELECT m.*, art.artist, alb.album, lab.label, cat.catalogue_number, 
                            loc.storage_location, yr.release_year, m.this_release_year,
                            pft.physical_format_type, m.this_release_duration, 
-                           m.duration_less_bonus, m.side_change_point, m.average_dynamic_range
+                           m.duration_less_bonus, m.side_change_point, m.average_dynamic_range,
+                           m.notes_1, m.notes_2, m.notes_3, m.disc_creation_date,
+                           ryn.yes_no AS retail_disc_status,
+                           ldb.disc_brand,
+                           ldb2.disc_brand AS dvdr_brand,
+                           lcc.cdr_code,
+                           lbc.bdr_dvdr_code,
+                           lwd.disc_writing_device
                     FROM master_release_entry m
                     INNER JOIN lookup_artist art ON m.artist_id = art.id
                     INNER JOIN lookup_album alb ON m.album_id = alb.album_id
@@ -59,13 +68,19 @@ def view_master():
                     INNER JOIN lookup_storage_location loc ON m.storage_location_id = loc.id
                     INNER JOIN lookup_original_release_year yr ON m.original_release_year_id = yr.id
                     INNER JOIN lookup_physical_format_type pft ON m.physical_format_type_id = pft.id
+                    LEFT JOIN lookup_yes_no ryn ON m.retail_disc_id = ryn.id
+                    LEFT JOIN lookup_disc_brand ldb ON m.cdr_brand_id = ldb.id
+                    LEFT JOIN lookup_disc_brand ldb2 ON m.dvdr_brand_id = ldb2.id
+                    LEFT JOIN lookup_cdr_code lcc ON m.cdr_code_id = lcc.id1
+                    LEFT JOIN lookup_bdr_dvdr_code lbc ON m.dvdr_code_id = lbc.id
+                    LEFT JOIN lookup_disc_writing_device lwd ON m.disc_writing_device_id = lwd.id
                     WHERE m.id = %s
                 """
                 cursor.execute(query, (search_id,))
                 result = cursor.fetchone()
 
                 if result:
-                    # Final Version Query with Storage Location Join
+                    # 2. Other Versions Query
                     version_query = """
                         SELECT v.id, v.duration, v.average_dynamic_range, v.individual_comment,
                                bd.bit_depth, sr.sample_rate, df.digital_format_type, 
@@ -86,10 +101,29 @@ def view_master():
                     """
                     cursor.execute(version_query, (search_id,))
                     other_versions = cursor.fetchall()
+
+                    # 3. Interactions Log Query
+                    interaction_query = """
+                        SELECT mil.id, mil.interaction_date, li.interaction_type, 
+                               lcat.catalogue_number, lpft.physical_format_type, 
+                               lbd.bit_depth, lsr.sample_rate, mil.individual_comment
+                        FROM media_interaction_log mil
+                        LEFT JOIN lookup_interaction_type li ON mil.interaction_type_id = li.id
+                        LEFT JOIN lookup_catalogue_no lcat ON mil.catalogue_no_id = lcat.id
+                        LEFT JOIN lookup_physical_format_type lpft ON mil.physical_format_type_id = lpft.id
+                        LEFT JOIN lookup_bit_depth lbd ON mil.bit_depth_id = lbd.id
+                        LEFT JOIN lookup_sample_rate lsr ON mil.sample_rate_id = lsr.id
+                        WHERE mil.master_release_entry_id = %s
+                        ORDER BY mil.interaction_date DESC
+                    """
+                    cursor.execute(interaction_query, (search_id,))
+                    interactions = cursor.fetchall()
+
     finally:
         conn.close()
 
-    return render_template('view_master.html', albums=albums, result=result, other_versions=other_versions)
+    return render_template('view_master.html', albums=albums, result=result, 
+                           other_versions=other_versions, interactions=interactions)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
