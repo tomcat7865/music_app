@@ -27,12 +27,11 @@ def index():
         conn.close()
     return render_template('index.html', albums=albums)
 
-# --- CONTROL PANEL DASHBOARD ---
 @app.route('/control_panel')
 def control_panel_home():
     return render_template('control_panel_menu.html')
 
-# --- ARTIST MANAGER ---
+# --- ARTIST / ALBUM / LABEL MANAGERS ---
 @app.route('/control_panel/artists', methods=['GET', 'POST'])
 def manage_artists():
     conn = get_db_connection()
@@ -58,18 +57,14 @@ def save_artist():
         with conn.cursor() as cursor:
             if artist_id:
                 cursor.execute("UPDATE lookup_artist SET artist = %s WHERE id = %s", (artist_name, artist_id))
-                flash(f"Updated Artist: {artist_name}", "success")
             else:
                 cursor.execute("INSERT INTO lookup_artist (artist) VALUES (%s)", (artist_name,))
-                flash(f"Added New Artist: {artist_name}", "success")
             conn.commit()
-    except Exception as e:
-        flash(f"Error: {str(e)}", "danger")
+            flash("Artist Saved Successfully", "success")
     finally:
         conn.close()
     return redirect(url_for('manage_artists'))
 
-# --- ALBUM MANAGER ---
 @app.route('/control_panel/albums', methods=['GET', 'POST'])
 def manage_albums():
     conn = get_db_connection()
@@ -95,18 +90,14 @@ def save_album():
         with conn.cursor() as cursor:
             if album_id:
                 cursor.execute("UPDATE lookup_album SET album = %s WHERE album_id = %s", (album_name, album_id))
-                flash(f"Updated Album: {album_name}", "success")
             else:
                 cursor.execute("INSERT INTO lookup_album (album) VALUES (%s)", (album_name,))
-                flash(f"Added New Album: {album_name}", "success")
             conn.commit()
-    except Exception as e:
-        flash(f"Error: {str(e)}", "danger")
+            flash("Album Saved Successfully", "success")
     finally:
         conn.close()
     return redirect(url_for('manage_albums'))
 
-# --- LABEL MANAGER ---
 @app.route('/control_panel/labels', methods=['GET', 'POST'])
 def manage_labels():
     conn = get_db_connection()
@@ -132,68 +123,134 @@ def save_label():
         with conn.cursor() as cursor:
             if label_id:
                 cursor.execute("UPDATE lookup_label SET label = %s WHERE id = %s", (label_name, label_id))
-                flash(f"Updated Label: {label_name}", "success")
             else:
                 cursor.execute("INSERT INTO lookup_label (label) VALUES (%s)", (label_name,))
-                flash(f"Added New Label: {label_name}", "success")
             conn.commit()
-    except Exception as e:
-        flash(f"Error: {str(e)}", "danger")
+            flash("Label Saved Successfully", "success")
     finally:
         conn.close()
     return redirect(url_for('manage_labels'))
 
-# --- VIEW MASTER ---
+# --- CATALOGUE NUMBERS MANAGER ---
+@app.route('/control_panel/catalogue_numbers', methods=['GET'])
+def manage_catalogue_numbers():
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT id, catalogue_number FROM lookup_catalogue_no ORDER BY catalogue_number ASC")
+            cat_nos = cursor.fetchall()
+    finally:
+        conn.close()
+    return render_template('manage_catalogue_numbers.html', cat_nos=cat_nos)
+
+@app.route('/control_panel/catalogue_numbers/save', methods=['POST'])
+def save_catalogue_number():
+    cat_id = request.form.get('cat_id')
+    cat_val = request.form.get('cat_val')
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            if cat_id:
+                cursor.execute("UPDATE lookup_catalogue_no SET catalogue_number = %s WHERE id = %s", (cat_val, cat_id))
+            else:
+                cursor.execute("INSERT INTO lookup_catalogue_no (catalogue_number) VALUES (%s)", (cat_val,))
+            conn.commit()
+            flash("Catalogue Number Saved Successfully", "success")
+    finally:
+        conn.close()
+    return redirect(url_for('manage_catalogue_numbers'))
+
+# --- MEDIA SPECS (BRANDS / CDR / DVDR) ---
+@app.route('/control_panel/media_specs')
+def manage_media_specs():
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT id, disc_brand FROM lookup_disc_brand ORDER BY disc_brand ASC")
+            brands = cursor.fetchall()
+            cursor.execute("SELECT id1 AS id, cdr_code FROM lookup_cdr_code ORDER BY cdr_code ASC")
+            cdr_codes = cursor.fetchall()
+            cursor.execute("SELECT id, bdr_dvdr_code FROM lookup_bdr_dvdr_code ORDER BY bdr_dvdr_code ASC")
+            dvd_codes = cursor.fetchall()
+    finally:
+        conn.close()
+    return render_template('manage_media_specs.html', brands=brands, cdr_codes=cdr_codes, dvd_codes=dvd_codes)
+
+@app.route('/control_panel/media_specs/save', methods=['POST'])
+def save_media_spec():
+    spec_type = request.form.get('spec_type')
+    item_id = request.form.get('item_id')
+    item_value = request.form.get('item_value')
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            if spec_type == 'brand':
+                if item_id:
+                    cursor.execute("UPDATE lookup_disc_brand SET disc_brand = %s WHERE id = %s", (item_value, item_id))
+                else:
+                    cursor.execute("INSERT INTO lookup_disc_brand (disc_brand) VALUES (%s)", (item_value,))
+            elif spec_type == 'cdr':
+                if item_id:
+                    cursor.execute("UPDATE lookup_cdr_code SET cdr_code = %s WHERE id1 = %s", (item_value, item_id))
+                else:
+                    cursor.execute("INSERT INTO lookup_cdr_code (cdr_code) VALUES (%s)", (item_value,))
+            elif spec_type == 'dvd':
+                if item_id:
+                    cursor.execute("UPDATE lookup_bdr_dvdr_code SET bdr_dvdr_code = %s WHERE id = %s", (item_value, item_id))
+                else:
+                    cursor.execute("INSERT INTO lookup_bdr_dvdr_code (bdr_dvdr_code) VALUES (%s)", (item_value,))
+            conn.commit()
+            flash(f"Successfully saved to {spec_type.upper()} table.", "success")
+    finally:
+        conn.close()
+    return redirect(url_for('manage_media_specs'))
+
+# --- LOCATIONS MANAGER ---
+@app.route('/control_panel/locations', methods=['GET'])
+def manage_locations():
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT id, storage_location FROM lookup_storage_location ORDER BY storage_location ASC")
+            locations = cursor.fetchall()
+    finally:
+        conn.close()
+    return render_template('manage_locations.html', locations=locations)
+
+@app.route('/control_panel/locations/save', methods=['POST'])
+def save_location():
+    loc_id = request.form.get('loc_id')
+    loc_name = request.form.get('loc_name')
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            if loc_id:
+                cursor.execute("UPDATE lookup_storage_location SET storage_location = %s WHERE id = %s", (loc_name, loc_id))
+            else:
+                cursor.execute("INSERT INTO lookup_storage_location (storage_location) VALUES (%s)", (loc_name,))
+            conn.commit()
+            flash("Location Saved Successfully", "success")
+    finally:
+        conn.close()
+    return redirect(url_for('manage_locations'))
+
 @app.route('/view_master')
 def view_master():
     search_id = request.args.get('id')
     conn = get_db_connection()
     albums = []
     result = None
-    other_versions = []
-    interactions = []
     try:
         with conn.cursor() as cursor:
-            dropdown_query = "SELECT m.id AS master_id, a.album AS album_name FROM master_release_entry m JOIN lookup_album a ON m.album_id = a.album_id ORDER BY a.album ASC"
-            cursor.execute(dropdown_query)
+            cursor.execute("SELECT m.id AS master_id, a.album AS album_name FROM master_release_entry m JOIN lookup_album a ON m.album_id = a.album_id ORDER BY a.album ASC")
             albums = cursor.fetchall()
             if search_id:
-                query = """
-                    SELECT m.*, art.artist, alb.album, lab.label, cat.catalogue_number, 
-                           loc.storage_location, yr.release_year, m.this_release_year,
-                           pft.physical_format_type, m.this_release_duration, 
-                           m.duration_less_bonus, m.side_change_point, m.average_dynamic_range,
-                           m.notes_1, m.notes_2, m.notes_3, m.disc_creation_date,
-                           ryn.yes_no AS retail_disc_status, ldb.disc_brand, ldb2.disc_brand AS dvdr_brand,
-                           lcc.cdr_code, lbc.bdr_dvdr_code, lwd.disc_writing_device
-                    FROM master_release_entry m
-                    INNER JOIN lookup_artist art ON m.artist_id = art.id
-                    INNER JOIN lookup_album alb ON m.album_id = alb.album_id
-                    INNER JOIN lookup_label lab ON m.label_id = lab.id
-                    INNER JOIN lookup_catalogue_no cat ON m.catalogue_no_id = cat.id
-                    INNER JOIN lookup_storage_location loc ON m.storage_location_id = loc.id
-                    INNER JOIN lookup_original_release_year yr ON m.original_release_year_id = yr.id
-                    INNER JOIN lookup_physical_format_type pft ON m.physical_format_type_id = pft.id
-                    LEFT JOIN lookup_yes_no ryn ON m.retail_disc_id = ryn.id
-                    LEFT JOIN lookup_disc_brand ldb ON m.cdr_brand_id = ldb.id
-                    LEFT JOIN lookup_disc_brand ldb2 ON m.dvdr_brand_id = ldb2.id
-                    LEFT JOIN lookup_cdr_code lcc ON m.cdr_code_id = lcc.id1
-                    LEFT JOIN lookup_bdr_dvdr_code lbc ON m.dvdr_code_id = lbc.id
-                    LEFT JOIN lookup_disc_writing_device lwd ON m.disc_writing_device_id = lwd.id
-                    WHERE m.id = %s
-                """
+                query = "SELECT m.*, art.artist, alb.album, lab.label, cat.catalogue_number FROM master_release_entry m JOIN lookup_artist art ON m.artist_id = art.id JOIN lookup_album alb ON m.album_id = alb.album_id JOIN lookup_label lab ON m.label_id = lab.id JOIN lookup_catalogue_no cat ON m.catalogue_no_id = cat.id WHERE m.id = %s"
                 cursor.execute(query, (search_id,))
                 result = cursor.fetchone()
-                if result:
-                    version_query = "SELECT v.*, bd.bit_depth, sr.sample_rate, df.digital_format_type, vlab.label, vcat.catalogue_number, vyr.release_year AS version_year, vpft.physical_format_type AS version_format, vbook.yes_no AS booklet_status, vloc.storage_location AS version_location FROM other_version_entry v LEFT JOIN lookup_bit_depth bd ON v.bit_depth_id = bd.id LEFT JOIN lookup_sample_rate sr ON v.sample_rate_id = sr.id LEFT JOIN lookup_digital_format_type df ON v.digital_format_type_id = df.id LEFT JOIN lookup_label vlab ON v.label_id = vlab.id LEFT JOIN lookup_catalogue_no vcat ON v.catalogue_no_id = vcat.id LEFT JOIN lookup_original_release_year vyr ON v.this_release_year_id = vyr.id LEFT JOIN lookup_physical_format_type vpft ON v.physical_format_type_id = vpft.id LEFT JOIN lookup_yes_no vbook ON v.booklet_available_id = vbook.id LEFT JOIN lookup_storage_location vloc ON v.storage_location_id = vloc.id WHERE v.master_release_entry_id = %s"
-                    cursor.execute(version_query, (search_id,))
-                    other_versions = cursor.fetchall()
-                    interaction_query = "SELECT mil.*, li.interaction_type, lcat.catalogue_number, lpft.physical_format_type, lbd.bit_depth, lsr.sample_rate FROM media_interaction_log mil LEFT JOIN lookup_interaction_type li ON mil.interaction_type_id = li.id LEFT JOIN lookup_catalogue_no lcat ON mil.catalogue_no_id = lcat.id LEFT JOIN lookup_physical_format_type lpft ON mil.physical_format_type_id = lpft.id LEFT JOIN lookup_bit_depth lbd ON mil.bit_depth_id = lbd.id LEFT JOIN lookup_sample_rate lsr ON mil.sample_rate_id = lsr.id WHERE mil.master_release_entry_id = %s ORDER BY mil.interaction_date DESC"
-                    cursor.execute(interaction_query, (search_id,))
-                    interactions = cursor.fetchall()
     finally:
         conn.close()
-    return render_template('view_master.html', albums=albums, result=result, other_versions=other_versions, interactions=interactions)
+    return render_template('view_master.html', albums=albums, result=result)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

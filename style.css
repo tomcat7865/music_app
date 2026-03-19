@@ -50,7 +50,7 @@ body {
     gap: 5px;
 }
 
-.search-section, .master-details, .versions-section {
+.search-section, .master-details, .versions-section, .notes-section, .history-section {
     background: #161616;
     padding: 25px;
     border-radius: 4px;
@@ -72,34 +72,7 @@ body {
     align-items: stretch;
 }
 
-@media (max-width: 768px) {
-    .details-grid { grid-template-columns: 1fr; }
-}
-
-/* --- CARDS & BOXES --- */
-.nav-card {
-    background: #161616;
-    border: 1px solid #222;
-    border-radius: 4px;
-    padding: 40px;
-    text-align: center;
-    text-decoration: none;
-    color: #aaa;
-    transition: all 0.2s ease;
-}
-
-.nav-card:hover {
-    background: #1c1c1c;
-    border-color: #444;
-    color: #fff;
-}
-
-.nav-card i {
-    font-size: 2.5rem;
-    margin-bottom: 15px;
-    color: #555;
-}
-
+/* --- SPECIFIC BOXES --- */
 .spec-box {
     background: #1a1a1a;
     padding: 20px;
@@ -130,16 +103,17 @@ body {
     color: #bbb;
 }
 
-/* --- TABLES --- */
+/* --- TABLES & ALTERNATE LINE COLORING --- */
 table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 10px;
 }
 
 th {
     text-align: left;
     padding: 12px;
-    background: #1c1c1c;
+    background: #111;
     color: #666;
     font-size: 0.75rem;
     text-transform: uppercase;
@@ -147,30 +121,31 @@ th {
 }
 
 td {
-    padding: 12px;
-    border-bottom: 1px solid #1a1a1a;
-    font-size: 0.9rem;
+    padding: 10px 12px;
+    font-size: 0.85rem;
     color: #999;
+    border-bottom: 1px solid #1a1a1a;
 }
 
-/* --- INPUTS & SELECTS (ARTIST MANAGER LOOK) --- */
+/* Zebra Striping */
+tbody tr:nth-child(even) {
+    background-color: #1a1a1a;
+}
+
+tbody tr:hover {
+    background-color: #222;
+}
+
+/* --- INPUTS & BUTTONS --- */
 input[type="text"], select {
-    background: #1a1a1a; /* Matches the spec-box/artist manager fields */
+    background: #0d0d0d;
     color: #eee;
     border: 1px solid #333;
     padding: 10px;
     border-radius: 2px;
     width: 100%;
-    box-sizing: border-box;
 }
 
-input:focus, select:focus {
-    border-color: #555;
-    outline: none;
-    background: #222;
-}
-
-/* --- BUTTONS --- */
 button {
     background: #333;
     color: #eee;
@@ -181,42 +156,16 @@ button {
     text-transform: uppercase;
     font-size: 0.8rem;
     border-radius: 2px;
-    transition: 0.2s;
 }
 
-button:hover {
-    background: #444;
-}
-
-/* THE GREEN SAVE BUTTON */
 button[type="submit"] {
     background: #2e7d32;
     border-color: #1b5e20;
     color: white;
 }
 
-button[type="submit"]:hover {
-    background: #388e3c;
-}
-
-/* THE MUTED CLEAR BUTTON (AS PER ARTIST MANAGER) */
-.clear-btn {
-    background: transparent !important;
-    border: none !important;
-    color: #444 !important;
-    font-weight: bold;
-    font-size: 0.8rem;
-    cursor: pointer;
-    padding: 10px;
-}
-
-.clear-btn:hover {
-    color: #666 !important;
-}
-
 /* --- TABS SYSTEM --- */
 .tab-buttons { display: flex; gap: 2px; }
-
 .tab-btn {
     background: #161616;
     color: #555;
@@ -226,17 +175,10 @@ button[type="submit"]:hover {
     border-radius: 4px 4px 0 0;
     cursor: pointer;
 }
-
 .tab-btn.active {
     background: #222;
     color: #fff;
     border-top: 2px solid #555;
 }
-
 .tab-content { display: none; padding-top: 0; }
 .tab-content.active { display: block; }
-
-/* --- FLASH MESSAGES --- */
-.flash { padding: 15px; border-radius: 2px; margin-bottom: 15px; font-size: 0.9rem; text-align: center;}
-.success { background: #1b2e1b; color: #7cb37c; border: 1px solid #2d4d2d; }
-.danger { background: #2e1b1b; color: #b37c7c; border: 1px solid #4d2d2d; }

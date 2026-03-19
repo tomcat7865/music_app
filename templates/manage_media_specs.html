@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="/control_panel" style="color: #666; text-decoration: none; font-size: 0.9rem;">
+        <i class="fas fa-arrow-left"></i> Back to Control Panel
+    </a>
+</div>
+
+<div class="search-section">
+    <h1 style="color: #eee; margin-top: 0;"><i class="fas fa-microchip" style="color: #444; margin-right: 10px;"></i> Media Specifications</h1>
+    <p style="color: #666;">Manage Disc Brands and Technical Identification Codes.</p>
+
+    <div class="tab-buttons" style="margin-top: 30px;">
+        <button class="tab-btn active" onclick="openTab(event, 'brands')">Disc Brands</button>
+        <button class="tab-btn" onclick="openTab(event, 'cdr')">CD-R Codes</button>
+        <button class="tab-btn" onclick="openTab(event, 'dvd')">DVD/BD Codes</button>
+    </div>
+
+    <div id="brands" class="tab-content active">
+        <div class="details-grid" style="margin-top: 20px;">
+            <div class="column">
+                <div class="spec-box">
+                    <label class="detail-label">Select Existing Brand</label>
+                    <select id="brand-dropdown" onchange="syncField('brand')" style="margin-top: 10px;">
+                        <option value="">-- Choose Brand --</option>
+                        {% for b in brands %}
+                        <option value="{{ b.id }}">{{ b.disc_brand }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="column">
+                <div class="spec-box">
+                    <form action="/control_panel/media_specs/save" method="POST">
+                        <input type="hidden" name="spec_type" value="brand">
+                        <input type="hidden" id="brand_id" name="item_id">
+                        <label class="detail-label">Brand Name</label>
+                        <input type="text" id="brand_name" name="item_value" style="margin-top:10px;" required>
+                        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                            <button type="button" onclick="clearForm('brand')" class="clear-btn">Clear</button>
+                            <button type="submit">Save Brand</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cdr" class="tab-content">
+        <div class="details-grid" style="margin-top: 20px;">
+            <div class="column">
+                <div class="spec-box">
+                    <label class="detail-label">Select Existing ATIP</label>
+                    <select id="cdr-dropdown" onchange="syncField('cdr')" style="margin-top: 10px;">
+                        <option value="">-- Choose Code --</option>
+                        {% for c in cdr_codes %}
+                        <option value="{{ c.id }}">{{ c.cdr_code }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="column">
+                <div class="spec-box">
+                    <form action="/control_panel/media_specs/save" method="POST">
+                        <input type="hidden" name="spec_type" value="cdr">
+                        <input type="hidden" id="cdr_id" name="item_id">
+                        <label class="detail-label">ATIP / CD-R Code</label>
+                        <input type="text" id="cdr_name" name="item_value" style="margin-top:10px;" required>
+                        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                            <button type="button" onclick="clearForm('cdr')" class="clear-btn">Clear</button>
+                            <button type="submit">Save Code</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dvd" class="tab-content">
+        <div class="details-grid" style="margin-top: 20px;">
+            <div class="column">
+                <div class="spec-box">
+                    <label class="detail-label">Select Existing Media ID</label>
+                    <select id="dvd-dropdown" onchange="syncField('dvd')" style="margin-top: 10px;">
+                        <option value="">-- Choose Code --</option>
+                        {% for d in dvd_codes %}
+                        <option value="{{ d.id }}">{{ d.bdr_dvdr_code }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="column">
+                <div class="spec-box">
+                    <form action="/control_panel/media_specs/save" method="POST">
+                        <input type="hidden" name="spec_type" value="dvd">
+                        <input type="hidden" id="dvd_id" name="item_id">
+                        <label class="detail-label">Media ID / DVD-BD Code</label>
+                        <input type="text" id="dvd_name" name="item_value" style="margin-top:10px;" required>
+                        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                            <button type="button" onclick="clearForm('dvd')" class="clear-btn">Clear</button>
+                            <button type="submit">Save Code</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; }
+    tablinks = document.getElementsByClassName("tab-btn");
+    for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+
+function syncField(prefix) {
+    const dropdown = document.getElementById(prefix + '-dropdown');
+    if(dropdown.value !== "") {
+        document.getElementById(prefix + '_id').value = dropdown.value;
+        document.getElementById(prefix + '_name').value = dropdown.options[dropdown.selectedIndex].text;
+    } else {
+        clearForm(prefix);
+    }
+}
+
+function clearForm(prefix) {
+    document.getElementById(prefix + '-dropdown').value = "";
+    document.getElementById(prefix + '_id').value = "";
+    document.getElementById(prefix + '_name').value = "";
+}
+</script>
+{% endblock %}

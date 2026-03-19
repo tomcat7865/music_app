@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="/control_panel" style="color: #666; text-decoration: none; font-size: 0.9rem;">
+        <i class="fas fa-arrow-left"></i> Back to Control Panel
+    </a>
+</div>
+
+<div class="search-section">
+    <h1 style="color: #eee; margin-top: 0;"><i class="fas fa-map-marker-alt" style="color: #444; margin-right: 10px;"></i> Storage Locations</h1>
+    <p style="color: #666;">Manage physical archive locations (Shelves, Boxes, Rooms).</p>
+
+    <div class="details-grid" style="margin-top: 30px;">
+        <div class="column">
+            <div class="spec-box">
+                <label class="detail-label">Existing Locations</label>
+                <select id="loc-dropdown" onchange="syncField()" style="margin-top: 10px;">
+                    <option value="">-- Choose Location to Edit --</option>
+                    {% for loc in locations %}
+                    <option value="{{ loc.id }}">{{ loc.storage_location }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="spec-box">
+                <form action="/control_panel/locations/save" method="POST">
+                    <input type="hidden" id="loc_id" name="loc_id">
+                    <label class="detail-label">Location Name</label>
+                    <input type="text" id="loc_name" name="loc_name" placeholder="e.g. Shelf A1" style="margin-top:10px;" required>
+                    
+                    <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: flex-end; align-items: center;">
+                        <button type="button" onclick="clearForm()" class="clear-btn">Clear</button>
+                        <button type="submit">Save Location</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function syncField() {
+    const dropdown = document.getElementById('loc-dropdown');
+    if(dropdown.value !== "") {
+        document.getElementById('loc_id').value = dropdown.value;
+        document.getElementById('loc_name').value = dropdown.options[dropdown.selectedIndex].text;
+    } else {
+        clearForm();
+    }
+}
+
+function clearForm() {
+    document.getElementById('loc-dropdown').value = "";
+    document.getElementById('loc_id').value = "";
+    document.getElementById('loc_name').value = "";
+}
+</script>
+{% endblock %}
