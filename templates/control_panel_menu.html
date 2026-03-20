@@ -1,68 +1,85 @@
 {% extends "layout.html" %}
-
 {% block content %}
 <div style="margin-bottom: 20px;">
-    <a href="/" style="color: #666; text-decoration: none; font-size: 0.9rem;">
-        <i class="fas fa-arrow-left"></i> Back to Main Dashboard
-    </a>
+    <a href="/" style="color: #666; text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to Archive</a>
 </div>
 
-<div style="text-align: center; margin-bottom: 40px;">
-    <h1 style="color: #eee;"><i class="fas fa-sliders-h" style="color: #444;"></i> Control Panel</h1>
-    <p style="color: #666;">Select a category to manage library lookup tables</p>
-</div>
-
-<h3 style="border-bottom: 1px solid #222; padding-bottom: 10px; color: #444; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;">Core Library Metadata</h3>
-<div class="landing-grid" style="margin-top: 20px; margin-bottom: 40px;">
+<div class="search-section">
+    <h1><i class="fas fa-sliders-h"></i> Control Panel</h1>
     
-    <a href="/control_panel/artists" class="nav-card">
-        <i class="fas fa-users"></i>
-        <h2>Artists</h2>
-        <p>Manage Artist Names</p>
-    </a>
-
-    <a href="/control_panel/albums" class="nav-card">
-        <i class="fas fa-compact-disc"></i>
-        <h2>Albums</h2>
-        <p>Manage Album Titles</p>
-    </a>
-
-    <a href="/control_panel/labels" class="nav-card">
-        <i class="fas fa-tag"></i>
-        <h2>Labels</h2>
-        <p>Manage Record Labels</p>
-    </a>
-
-    <a href="/control_panel/catalogue_numbers" class="nav-card">
-        <i class="fas fa-barcode"></i>
-        <h2>Cat #s</h2>
-        <p>Manage Catalogue Numbers</p>
-    </a>
-</div>
-
-<h3 style="border-bottom: 1px solid #222; padding-bottom: 10px; color: #444; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;">System Data & Specs</h3>
-<div class="landing-grid" style="margin-top: 20px;">
-    
-    <a href="/control_panel/media_specs" class="nav-card">
-        <i class="fas fa-microchip"></i>
-        <h2>Media Specs</h2>
-        <p>Disc Brands & Media Codes</p>
-    </a>
-
-    <a href="/control_panel/locations" class="nav-card">
-        <i class="fas fa-map-marker-alt"></i>
-        <h2>Locations</h2>
-        <p>Manage Storage Areas</p>
-    </a>
-
-    <div class="nav-card" style="opacity: 0.3; cursor: not-allowed;">
-        <i class="fas fa-history"></i>
-        <h2>Interactions</h2>
-        <p>Coming Soon</p>
+    <h2 style="color: #444; border-bottom: 1px solid #222; padding-bottom: 10px; margin-top: 40px;">
+        <i class="fas fa-database" style="margin-right: 10px;"></i> Library Metadata
+    </h2>
+    <div class="details-grid">
+        <div class="column">
+            <a href="/control_panel/artists" style="text-decoration: none;">
+                <div class="spec-box" style="text-align: center;">
+                    <i class="fas fa-user-astronaut" style="font-size: 2rem; color: #444; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 10px 0; color: #eee;">Artist Manager</h3>
+                    <p style="font-size: 0.8rem; color: #666;">Add or rename artists.</p>
+                </div>
+            </a>
+        </div>
+        <div class="column">
+            <a href="/control_panel/albums" style="text-decoration: none;">
+                <div class="spec-box" style="text-align: center;">
+                    <i class="fas fa-record-vinyl" style="font-size: 2rem; color: #444; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 10px 0; color: #eee;">Album Manager</h3>
+                    <p style="font-size: 0.8rem; color: #666;">Manage album titles.</p>
+                </div>
+            </a>
+        </div>
+        <div class="column">
+            <a href="/control_panel/labels" style="text-decoration: none;">
+                <div class="spec-box" style="text-align: center;">
+                    <i class="fas fa-tag" style="font-size: 2rem; color: #444; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 10px 0; color: #eee;">Label Manager</h3>
+                    <p style="font-size: 0.8rem; color: #666;">Update record labels.</p>
+                </div>
+            </a>
+        </div>
+        <div class="column">
+            <a href="/control_panel/catalogue_numbers" style="text-decoration: none;">
+                <div class="spec-box" style="text-align: center;">
+                    <i class="fas fa-barcode" style="font-size: 2rem; color: #444; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 10px 0; color: #eee;">Catalogue No's</h3>
+                    <p style="font-size: 0.8rem; color: #666;">Edit release ID numbers.</p>
+                </div>
+            </a>
+        </div>
     </div>
-</div>
 
-<div style="margin-top: 60px; text-align: center; color: #222; font-size: 0.7rem; border-top: 1px solid #1a1a1a; padding-top: 20px;">
-    Physical Music Archive Management System v1.4
+    <h2 style="color: #444; border-bottom: 1px solid #222; padding-bottom: 10px; margin-top: 50px;">
+        <i class="fas fa-box-open" style="margin-right: 10px;"></i> Physical Management
+    </h2>
+    <div class="details-grid">
+        <div class="column">
+            <a href="/control_panel/interactions" style="text-decoration: none;">
+                <div class="spec-box" style="text-align: center; border: 1px solid #28a745;">
+                    <i class="fas fa-history" style="font-size: 2rem; color: #28a745; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 10px 0; color: #eee;">Media Interactions</h3>
+                    <p style="font-size: 0.8rem; color: #666;">Log plays and maintenance.</p>
+                </div>
+            </a>
+        </div>
+        <div class="column">
+            <a href="/control_panel/locations" style="text-decoration: none;">
+                <div class="spec-box" style="text-align: center;">
+                    <i class="fas fa-map-marker-alt" style="font-size: 2rem; color: #444; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 10px 0; color: #eee;">Storage Locations</h3>
+                    <p style="font-size: 0.8rem; color: #666;">Manage shelf assignments.</p>
+                </div>
+            </a>
+        </div>
+        <div class="column">
+            <a href="/control_panel/media_specs" style="text-decoration: none;">
+                <div class="spec-box" style="text-align: center;">
+                    <i class="fas fa-microchip" style="font-size: 2rem; color: #444; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 10px 0; color: #eee;">Media Specs</h3>
+                    <p style="font-size: 0.8rem; color: #666;">Disc brands and tech codes.</p>
+                </div>
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock %}
