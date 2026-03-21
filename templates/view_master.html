@@ -1,177 +1,268 @@
 {% extends "layout.html" %}
-
 {% block content %}
-<div class="search-section">
-    <h1>Library Explorer</h1>
-    <div class="search-controls">
-        <label>Select Album:</label>
-        <select onchange="fetchAlbum(this.value)">
-            <option value="">-- Choose from Library --</option>
-            {% for album in albums %}
-                <option value="{{ album.master_id }}" {% if result and result.id|string == album.master_id|string %}selected{% endif %}>
-                    {{ album.album_name }}
-                </option>
-            {% endfor %}
-        </select>
-        <span style="margin: 0 15px; color: #444;">|</span>
-        <input type="text" id="manual_id" placeholder="Master ID" value="{{ result.id if result else '' }}">
-        <button onclick="searchManual()">Load</button>
+<style>
+    /* 1. Remove number input spinners (odd icons) */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+    }
+    input[type=number] { -moz-appearance: textfield; }
+
+    /* 2. Tightened vertical spacing for grid rows */
+    .grid-row {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        border-bottom: 1px solid #222; 
+        padding: 8px 0; /* Shrunk a pinch from 12px */
+    }
+
+    /* Tab navigation styling */
+    .tab-btn {
+        background: #333; 
+        border: 1px solid #444; 
+        color: #eee;
+        font-size: 0.6rem; 
+        padding: 6px 4px; 
+        flex: 1;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+    .tab-btn:hover { background: #444; }
+</style>
+
+<div style="margin-bottom: 20px;">
+    <a href="/" style="color: #666; text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to Home</a>
+</div>
+
+<div class="search-section" style="margin-bottom: 30px;">
+    <div style="display: flex; gap: 20px; align-items: flex-end;">
+        <div style="flex: 3;">
+            <label style="color: #28a745; font-size: 0.8rem; display: block; margin-bottom: 8px; letter-spacing: 1px;">ALBUM NAME</label>
+            <form action="{{ url_for('view_master') }}" method="get" style="display: flex; gap: 10px;">
+                <select name="id" required style="width: 100%; padding: 10px; background: #222; color: #eee; border: 1px solid #444; border-radius: 4px;">
+                    <option value="" disabled selected>--- Select an Album ---</option>
+                    {% for album in albums_list %}
+                        <option value="{{ album.id }}" {% if result and result.id == album.id %}selected{% endif %}>{{ album.album }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn">LOAD</button>
+            </form>
+        </div>
+        <div style="flex: 1;">
+            <label style="color: #666; font-size: 0.8rem; display: block; margin-bottom: 8px; letter-spacing: 1px;">MASTER ID</label>
+            <form action="{{ url_for('view_master') }}" method="get" style="display: flex; gap: 10px;">
+                <input type="number" name="id" placeholder="ID..." required style="width: 100%; padding: 10px; background: #222; color: #eee; border: 1px solid #444; border-radius: 4px;">
+                <button type="submit" class="btn">GO</button>
+            </form>
+        </div>
     </div>
 </div>
 
 {% if result %}
-<div class="master-details">
-    <h2>Master Record Details</h2>
-    <div class="details-grid">
-        <div class="column">
-            <div class="detail-row"><div class="detail-label">ID</div><div class="detail-value">{{ result.id }}</div></div>
-            <div class="detail-row"><div class="detail-label">Artist</div><div class="detail-value">{{ result.artist }}</div></div>
-            <div class="detail-row"><div class="detail-label">Album</div><div class="detail-value">{{ result.album }}</div></div>
-            <div class="detail-row"><div class="detail-label">Primary Label</div><div class="detail-value">{{ result.label }}</div></div>
-            <div class="detail-row"><div class="detail-label">Catalogue No.</div><div class="detail-value">{{ result.catalogue_number }}</div></div>
-            <div class="detail-row"><div class="detail-label">STORAGE LOCATION</div><div class="detail-value">{{ result.storage_location }}</div></div>
-            <div class="detail-row"><div class="detail-label">AVERAGE DR (MASTER)</div><div class="detail-value">{{ result.average_dynamic_range }}</div></div>
+<div class="search-section" style="margin-bottom: 20px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 60px;">
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">ARTIST</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.artist }}</span>
         </div>
-        <div class="column">
-            <div class="detail-row"><div class="detail-label">ORIGINAL RELEASE YEAR</div><div class="detail-value">{{ result.release_year }}</div></div>
-            <div class="detail-row"><div class="detail-label">Issue Year</div><div class="detail-value">{{ result.this_release_year }}</div></div>
-            <div class="detail-row"><div class="detail-label">Format</div><div class="detail-value">{{ result.physical_format_type }}</div></div>
-            <div class="detail-row"><div class="detail-label">Duration</div><div class="detail-value">{{ result.this_release_duration }}</div></div>
-            <div class="detail-row"><div class="detail-label">DURATION (LESS BONUS TRACKS)</div><div class="detail-value">{{ result.duration_less_bonus if result.duration_less_bonus else '---' }}</div></div>
-            <div class="detail-row"><div class="detail-label">SIDE CHANGE (END OF)</div><div class="detail-value">{{ result.side_change_point }}</div></div>
-            <div class="detail-row" style="border: none; margin-top: 20px;">
-                <div class="button-group">
-                    <button id="btn-versions" class="action-btn active" onclick="showTab('versions')">Other Versions</button>
-                    <button id="btn-notes" class="action-btn" onclick="showTab('notes')">Notes</button>
-                    <button id="btn-interactions" class="action-btn" onclick="showTab('interactions')">History</button>
-                    <button id="btn-technical" class="action-btn" onclick="showTab('technical')">Technical</button>
-                </div>
-            </div>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">DURATION</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.this_release_duration or '---' }}</span>
         </div>
-    </div>
-</div>
-
-<div class="dynamic-section">
-    <div id="versions" class="tab-content active">
-        <h3>Version Inventory</h3>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th><th>Bit</th><th>Rate</th><th>Type</th><th>Label</th><th>Cat #</th><th>Year</th><th>Format</th><th>Dur.</th><th>Avg DR</th><th>Book</th><th>Location</th><th>Comments</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for version in other_versions %}
-                    <tr>
-                        <td>{{ version.id }}</td>
-                        <td>{{ version.bit_depth }}</td>
-                        <td>{{ version.sample_rate }}</td>
-                        <td>{{ version.digital_format_type }}</td>
-                        <td>{{ version.label }}</td>
-                        <td>{{ version.catalogue_number }}</td>
-                        <td>{{ version.version_year }}</td>
-                        <td>{{ version.version_format }}</td>
-                        <td>{{ version.duration }}</td>
-                        <td>{{ version.average_dynamic_range }}</td>
-                        <td>{{ version.booklet_status }}</td>
-                        <td>{% if version.version_location %}{{ version.version_location }}{% else %}<i>NULL</i>{% endif %}</td>
-                        <td>{{ version.individual_comment }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">LABEL</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.label or '---' }}</span>
         </div>
-    </div>
-
-    <div id="notes" class="tab-content">
-        <h3>Master Release Notes</h3>
-        <div class="notes-container">
-            {% if result.notes_1 %}<div class="note-box"><h4>Note 1</h4><p>{{ result.notes_1 }}</p></div>{% endif %}
-            {% if result.notes_2 %}<div class="note-box"><h4>Note 2</h4><p>{{ result.notes_2 }}</p></div>{% endif %}
-            {% if result.notes_3 %}<div class="note-box"><h4>Note 3</h4><p>{{ result.notes_3 }}</p></div>{% endif %}
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">DUR (LESS BONUS)</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.duration_less_bonus or '---' }}</span>
         </div>
-    </div>
-
-    <div id="interactions" class="tab-content">
-        <h3>Interaction History</h3>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th><th>Date</th><th>Activity</th><th>Cat #</th><th>Format</th><th>Bit-Rate</th><th>Sample Rate</th><th>Comments</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for interaction in interactions %}
-                    <tr>
-                        <td>{{ interaction.id }}</td>
-                        <td>{{ interaction.interaction_date }}</td>
-                        <td>{{ interaction.interaction_type }}</td>
-                        <td>{{ interaction.catalogue_number }}</td>
-                        <td>{{ interaction.physical_format_type }}</td>
-                        <td>{% if interaction.bit_depth %}{{ interaction.bit_depth }}{% else %}<i>NULL</i>{% endif %}</td>
-                        <td>{% if interaction.sample_rate %}{{ interaction.sample_rate }}{% else %}<i>NULL</i>{% endif %}</td>
-                        <td>{% if interaction.individual_comment %}{{ interaction.individual_comment }}{% else %}<i>NULL</i>{% endif %}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">CATALOGUE #</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.catalogue_number or '---' }}</span>
         </div>
-    </div>
-
-    <div id="technical" class="tab-content">
-        <h3>Technical Specifications</h3>
-        <div class="details-grid">
-            <div class="column">
-                <div class="detail-row">
-                    <div class="detail-label">Retail Disc</div>
-                    <div class="detail-value">{% if result.retail_disc_status %}{{ result.retail_disc_status }}{% else %}<i>NULL</i>{% endif %}</div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">CD-R Brand</div>
-                    <div class="detail-value">{% if result.disc_brand %}{{ result.disc_brand }}{% else %}<i>NULL</i>{% endif %}</div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">CD-R Code</div>
-                    <div class="detail-value">{% if result.cdr_code %}{{ result.cdr_code }}{% else %}<i>NULL</i>{% endif %}</div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">Disc Creation Date</div>
-                    <div class="detail-value">{% if result.disc_creation_date %}{{ result.disc_creation_date }}{% else %}<i>NULL</i>{% endif %}</div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="detail-row">
-                    <div class="detail-label">DVD-R Brand</div>
-                    <div class="detail-value">{% if result.dvdr_brand %}{{ result.dvdr_brand }}{% else %}<i>NULL</i>{% endif %}</div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">DVD-R Code</div>
-                    <div class="detail-value">{% if result.bdr_dvdr_code %}{{ result.bdr_dvdr_code }}{% else %}<i>NULL</i>{% endif %}</div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">Writing Device</div>
-                    <div class="detail-value">{% if result.disc_writing_device %}{{ result.disc_writing_device }}{% else %}<i>NULL</i>{% endif %}</div>
-                </div>
-            </div>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">SIDE CHANGE</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.side_change_point or '---' }}</span>
+        </div>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">FORMAT</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.physical_format_type or '---' }}</span>
+        </div>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">AVG DR</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.average_dynamic_range or '---' }}</span>
+        </div>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">ORIGINAL YEAR</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.original_year or '---' }}</span>
+        </div>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">LOCATION</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.storage_location or '---' }}</span>
+        </div>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">THIS RELEASE</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.this_release_year or '---' }}</span>
+        </div>
+        
+        <div style="display: flex; gap: 8px; align-items: center; border-bottom: 1px solid #222; padding: 8px 0;">
+            <button onclick="toggleTab('other-versions')" class="tab-btn">OTHER VERSIONS</button>
+            <button onclick="toggleTab('notes')" class="tab-btn">NOTES</button>
+            <button onclick="toggleTab('interactions')" class="tab-btn">INTERACTIONS</button>
+            <button onclick="toggleTab('technical')" class="tab-btn">TECHNICAL</button>
         </div>
     </div>
 </div>
-{% endif %}
+
+<div id="other-versions" class="tab-content search-section" style="display: none; padding-top: 20px;">
+    <h3 style="color: #28a745; font-size: 0.85rem; margin-bottom: 15px; letter-spacing: 1px;">OTHER VERSIONS ARCHIVE</h3>
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.65rem; color: #ccc;">
+        <thead>
+            <tr style="text-align: left; border-bottom: 1px solid #444; color: #666;">
+                <th style="padding: 4px; width: 35px;">ID</th>
+                <th style="padding: 4px; width: 45px;">BIT</th>
+                <th style="padding: 4px; width: 55px;">RATE</th>
+                <th style="padding: 4px; width: 75px;">DIGITAL</th>
+                <th style="padding: 4px; width: 65px;">PHYS FMT</th>
+                <th style="padding: 4px; width: 45px;">YEAR</th>
+                <th style="padding: 4px; width: 75px;">LABEL</th>
+                <th style="padding: 4px; width: 85px;">CAT #</th>
+                <th style="padding: 4px; width: 55px;">DUR</th>
+                <th style="padding: 4px; width: 35px;">DR</th>
+                <th style="padding: 4px; width: 35px;">BKL</th>
+                <th style="padding: 4px; width: 90px;">LOCATION</th>
+                <th style="padding: 4px;">COMMENT</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for version in other_versions %}
+            <tr style="border-bottom: 1px solid #222;">
+                <td style="padding: 6px 4px; color: #666;">{{ version.id }}</td>
+                <td style="padding: 6px 4px;">{{ version.bit_depth or '-' }}</td>
+                <td style="padding: 6px 4px;">{{ version.sample_rate or '-' }}</td>
+                <td style="padding: 6px 4px;">{{ version.digital_format_type or '-' }}</td>
+                <td style="padding: 6px 4px;">{{ version.physical_format_type or '-' }}</td>
+                <td style="padding: 6px 4px;">{{ version.release_year or '-' }}</td>
+                <td style="padding: 6px 4px;">{{ version.label or '-' }}</td>
+                <td style="padding: 6px 4px;">{{ version.catalogue_number or '-' }}</td>
+                <td style="padding: 6px 4px;">{{ version.duration or '-' }}</td>
+                <td style="padding: 6px 4px;">{{ version.average_dynamic_range or '-' }}</td>
+                <td style="padding: 6px 4px;">{{ version.booklet or '-' }}</td>
+                <td style="padding: 6px 4px;">{{ version.storage_location or '-' }}</td>
+                <td style="padding: 6px 4px; font-style: italic; color: #888; line-height: 1.3;">{{ version.individual_comment or '' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div id="notes" class="tab-content search-section" style="display: none; padding-top: 20px;">
+    <h3 style="color: #28a745; font-size: 0.85rem; margin-bottom: 15px; letter-spacing: 1px;">RECORD NOTES</h3>
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        {% if result.notes_1 %}
+        <div style="background: #1a1a1a; padding: 15px; border-left: 3px solid #444; border-radius: 4px;">
+            <label style="color: #666; font-size: 0.7rem; display: block; margin-bottom: 8px; letter-spacing: 1px;">NOTE BLOCK 1</label>
+            <div style="color: #eee; font-size: 0.9rem; white-space: pre-wrap; line-height: 1.5;">{{ result.notes_1 }}</div>
+        </div>
+        {% endif %}
+        {% if result.notes_2 %}
+        <div style="background: #1a1a1a; padding: 15px; border-left: 3px solid #444; border-radius: 4px;">
+            <label style="color: #666; font-size: 0.7rem; display: block; margin-bottom: 8px; letter-spacing: 1px;">NOTE BLOCK 2</label>
+            <div style="color: #eee; font-size: 0.9rem; white-space: pre-wrap; line-height: 1.5;">{{ result.notes_2 }}</div>
+        </div>
+        {% endif %}
+        {% if result.notes_3 %}
+        <div style="background: #1a1a1a; padding: 15px; border-left: 3px solid #444; border-radius: 4px;">
+            <label style="color: #666; font-size: 0.7rem; display: block; margin-bottom: 8px; letter-spacing: 1px;">NOTE BLOCK 3</label>
+            <div style="color: #eee; font-size: 0.9rem; white-space: pre-wrap; line-height: 1.5;">{{ result.notes_3 }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div id="interactions" class="tab-content search-section" style="display: none; padding-top: 20px;">
+    <h3 style="color: #28a745; font-size: 0.85rem; margin-bottom: 15px; letter-spacing: 1px;">MEDIA INTERACTION LOG</h3>
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; color: #ccc;">
+        <thead>
+            <tr style="text-align: left; border-bottom: 1px solid #444; color: #666;">
+                <th style="padding: 8px; width: 40px;">ID</th>
+                <th style="padding: 8px; width: 100px;">DATE</th>
+                <th style="padding: 8px; width: 100px;">TYPE</th>
+                <th style="padding: 8px; width: 120px;">CAT #</th>
+                <th style="padding: 8px; width: 100px;">FORMAT</th>
+                <th style="padding: 8px; width: 60px;">BIT</th>
+                <th style="padding: 8px; width: 70px;">RATE</th>
+                <th style="padding: 8px;">COMMENT</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for int in interactions %}
+            <tr style="border-bottom: 1px solid #222;">
+                <td style="padding: 8px; color: #666;">{{ int.id }}</td>
+                <td style="padding: 8px;">{{ int.interaction_date }}</td>
+                <td style="padding: 8px;">{{ int.interaction_type or '-' }}</td>
+                <td style="padding: 8px;">{{ int.catalogue_number or '-' }}</td>
+                <td style="padding: 8px;">{{ int.physical_format_type or '-' }}</td>
+                <td style="padding: 8px;">{{ int.bit_depth or '-' }}</td>
+                <td style="padding: 8px;">{{ int.sample_rate or '-' }}</td>
+                <td style="padding: 8px; font-style: italic; color: #888;">{{ int.individual_comment or '' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div id="technical" class="tab-content search-section" style="display: none; padding-top: 20px;">
+    <h3 style="color: #28a745; font-size: 0.85rem; margin-bottom: 15px; letter-spacing: 1px;">TECHNICAL SPECIFICATIONS</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 60px;">
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">RETAIL DISC</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.retail_disc or '---' }}</span>
+        </div>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">CDR BRAND</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.cdr_brand or '---' }}</span>
+        </div>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">CDR CODE</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.cdr_code or '---' }}</span>
+        </div>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">DVDR BRAND</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.dvdr_brand or '---' }}</span>
+        </div>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">DVDR CODE</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.bdr_dvdr_code or '---' }}</span>
+        </div>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">CREATION DATE</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.disc_creation_date or '---' }}</span>
+        </div>
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">WRITING DEVICE</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.disc_writing_device or '---' }}</span>
+        </div>
+    </div>
+</div>
 
 <script>
-function fetchAlbum(id) { if (id) window.location.href = "/view_master?id=" + id; }
-function searchManual() {
-    const id = document.getElementById('manual_id').value;
-    if (id) window.location.href = "/view_master?id=" + id;
-}
-function showTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    const btnMap = { 'versions': 'btn-versions', 'notes': 'btn-notes', 'interactions': 'btn-interactions', 'technical': 'btn-technical' };
-    document.getElementById(btnMap[tabId]).classList.add('active');
+function toggleTab(tabId) {
+    const sections = document.querySelectorAll('.tab-content');
+    const target = document.getElementById(tabId);
+    const isVisible = target.style.display === 'block';
+    
+    // Hide all
+    sections.forEach(s => s.style.display = 'none');
+    
+    // Toggle target
+    target.style.display = isVisible ? 'none' : 'block';
 }
 </script>
+
+{% endif %}
 {% endblock %}
