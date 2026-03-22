@@ -1,15 +1,82 @@
 {% extends "layout.html" %}
 {% block content %}
 <style>
-    .suggestions-container { position: relative; }
-    .suggestions-list {
-        position: absolute; top: 100%; left: 0; width: 100%;
-        background: #1e1e1e; border: 1px solid #333; border-top: none;
-        max-height: 200px; overflow-y: auto; z-index: 1000; display: none;
-        border-radius: 0 0 4px 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    /* 1. UNIFIED INPUT STYLE */
+    input, select, textarea {
+        -webkit-appearance: none;
+        appearance: none;
+        box-sizing: border-box !important;
+        width: 100%;
+        height: 40px;
+        background: #222;
+        color: #eee;
+        border: 1px solid #444;
+        border-radius: 4px;
+        padding: 0 10px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        display: block;
     }
-    .suggestion-item { padding: 10px; cursor: pointer; color: #eee; border-bottom: 1px solid #222; }
-    .suggestion-item:hover { background: #28a745; color: white; }
+
+    /* 2. CUSTOM SEARCH DROPDOWN (Strict Alignment) */
+    .search-container {
+        position: relative; 
+        width: 100%;
+        box-sizing: border-box; /* Keeps it inside the grey area */
+    }
+
+    #custom_cat_results {
+        position: absolute;
+        top: 100%; 
+        left: 0;
+        width: 100%;
+        background: #2a2a2a;
+        border: 1px solid #444;
+        border-top: none;
+        z-index: 999;
+        max-height: 200px;
+        overflow-y: auto;
+        display: none; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    .search-item {
+        padding: 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #333;
+        font-size: 0.85rem;
+    }
+    .search-item:hover { background: #333; color: #28a745; }
+
+    /* 3. THE GRID (Vertical Sync) */
+    .grid-container {
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap: 20px;
+        /* Remove 'align-items: end' to keep labels and boxes naturally aligned */
+    }
+
+    label {
+        color: #666;
+        font-size: 0.7rem;
+        display: block;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+        height: 14px; /* Force identical label height for vertical sync */
+    }
+
+    #album_display {
+        height: 40px;
+        background: #1a1a1a;
+        color: #888;
+        border: 1px solid #333;
+        border-radius: 4px;
+        padding: 0 10px;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+    }
 </style>
 
 <div style="margin-bottom: 20px;">
@@ -17,104 +84,123 @@
 </div>
 
 <div class="search-section">
-    <h1><i class="fas fa-history" style="color: #28a745;"></i> Log Media Interaction</h1>
+    <h2 style="color: #28a745; margin-bottom: 20px; letter-spacing: 2px; font-size: 1.2rem;">LOG MEDIA INTERACTION</h2>
     
-    <form action="/control_panel/interactions/save" method="POST" autocomplete="off">
-        <div class="details-grid">
-            <div class="column">
-                <div class="spec-box">
-                    <label style="color: #666; font-size: 0.8rem; display: block; margin-bottom: 8px;">MASTER RELEASE ID</label>
-                    <input type="number" name="master_id" id="master_id" required placeholder="e.g. 101" 
-                           style="width:100%; padding:12px; background:#121212; border:1px solid #333; color:white; border-radius:4px;">
-                    <div id="verify_box" style="margin-top: 10px; padding: 10px; border-radius: 4px; background: #1a1a1a; font-size: 0.9rem; color: #444; border: 1px dashed #333;">
-                        Verify ID...
+    <form action="{{ url_for('save_interaction') }}" method="post" autocomplete="off">
+        <div class="grid-container">
+            
+            <div>
+                <label>MASTER RELEASE ID / DATE</label>
+                <div style="display: flex; gap: 20px;">
+                    <div style="flex: 1;"><input type="number" name="master_id" id="master_id" required></div>
+                    <div style="flex: 1;"><input type="date" name="interaction_date" id="interaction_date" required></div>
+                </div>
+            </div>
+
+            <div>
+                <label style="color: #28a745;">CORRESPONDING ALBUM</label>
+                <div id="album_display">Enter ID to look up...</div>
+            </div>
+
+            <div>
+                <label>INTERACTION TYPE</label>
+                <select name="interaction_type" required>
+                    {% for t in types %}
+                    <option value="{{ t.id }}">{{ t.interaction_type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="search-container">
+                <label>CATALOGUE #</label>
+                <input type="text" name="cat_number" id="cat_input" placeholder="Start typing...">
+                <div id="custom_cat_results"></div>
+            </div>
+
+            <div>
+                <label>PHYSICAL FORMAT</label>
+                <select name="format_id">
+                    {% for f in formats %}
+                    <option value="{{ f.id }}">{{ f.physical_format_type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label>BIT DEPTH / SAMPLE RATE</label>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <select name="bit_id">
+                            <option value="">N/A</option>
+                            {% for b in bits %}<option value="{{ b.id }}">{{ b.bit_depth }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <select name="sample_id">
+                            <option value="">N/A</option>
+                            {% for s in rates %}<option value="{{ s.id }}">{{ s.sample_rate }}</option>{% endfor %}
+                        </select>
                     </div>
                 </div>
             </div>
-
-            <div class="column">
-                <div class="spec-box suggestions-container">
-                    <label style="color: #666; font-size: 0.8rem; display: block; margin-bottom: 8px;">CATALOGUE NUMBER</label>
-                    <input type="text" id="cat_search" name="cat_number" required placeholder="Type to search..." 
-                           style="width:100%; padding:12px; background:#121212; border:1px solid #333; color:white; border-radius:4px;">
-                    <div id="cat_results" class="suggestions-list"></div>
-
-                    <label style="color: #666; font-size: 0.8rem; display: block; margin-top: 20px; margin-bottom: 8px;">PHYSICAL FORMAT</label>
-                    <select name="format_id" required style="width:100%; padding:12px; background:#121212; border:1px solid #333; color:white; border-radius:4px;">
-                        {% for f in formats %}<option value="{{f.id}}">{{f.physical_format_type}}</option>{% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <div class="column">
-                <div class="spec-box">
-                    <label style="color: #666; font-size: 0.8rem; display: block; margin-bottom: 8px;">INTERACTION TYPE</label>
-                    <select name="interaction_type" required style="width:100%; padding:12px; background:#121212; border:1px solid #333; color:white; border-radius:4px;">
-                        {% for t in types %}<option value="{{t.id}}">{{t.interaction_type}}</option>{% endfor %}
-                    </select>
-                    
-                    <label style="color: #666; font-size: 0.8rem; display: block; margin-top: 20px; margin-bottom: 8px;">DATE</label>
-                    <input type="date" name="interaction_date" id="today_date" required style="width:100%; padding:12px; background:#121212; border:1px solid #333; color:white; border-radius:4px;">
-                </div>
-            </div>
         </div>
-        <button type="submit" class="btn" style="width:100%; margin-top:20px; font-weight:bold; background:#28a745; padding: 20px;">
-            <i class="fas fa-save"></i> RECORD INTERACTION
-        </button>
+
+        <div style="margin-top: 20px;">
+            <label>INDIVIDUAL COMMENT</label>
+            <textarea name="comment" style="height: 80px; padding: 10px; width: 100%;"></textarea>
+        </div>
+
+        <button type="submit" class="btn" style="margin-top: 20px; width: 100%; padding: 15px;">SAVE INTERACTION</button>
     </form>
 </div>
 
 <script>
-document.getElementById('today_date').valueAsDate = new Date();
+const allCats = [{% for c in cats %}"{{ c.catalogue_number }}",{% endfor %}];
+const catInput = document.getElementById('cat_input');
+const catResults = document.getElementById('custom_cat_results');
 
-// Master ID Verification
-document.getElementById('master_id').addEventListener('input', function(e) {
-    const val = e.target.value;
-    const verifyBox = document.getElementById('verify_box');
-    if (val.length >= 1) {
-        fetch(`/api/verify_master/${val}`).then(res => res.json()).then(data => {
-            if (data.success) {
-                verifyBox.innerHTML = '<i class="fas fa-check" style="color: #28a745;"></i> ' + data.display;
-                verifyBox.style.borderColor = "#28a745";
-            } else {
-                verifyBox.innerHTML = '<i class="fas fa-times" style="color: #dc3545;"></i> Invalid ID';
-                verifyBox.style.borderColor = "#dc3545";
-            }
-        });
-    }
-});
-
-// Catalogue Number Search (Custom)
-const catSearch = document.getElementById('cat_search');
-const catResults = document.getElementById('cat_results');
-const catData = [ {% for c in cats %}"{{ c.catalogue_number }}", {% endfor %} ];
-
-catSearch.addEventListener('input', function() {
+catInput.addEventListener('input', function() {
     const val = this.value.toLowerCase();
     catResults.innerHTML = '';
     if (val.length < 1) { catResults.style.display = 'none'; return; }
-    
-    const matches = catData.filter(c => c.toLowerCase().includes(val));
-    if (matches.length > 0) {
-        matches.forEach(m => {
+    const filtered = allCats.filter(c => c.toLowerCase().includes(val)).slice(0, 10);
+    if (filtered.length > 0) {
+        filtered.forEach(item => {
             const div = document.createElement('div');
-            div.classList.add('suggestion-item');
-            div.innerText = m;
+            div.classList.add('search-item');
+            div.innerText = item;
             div.onclick = function() {
-                catSearch.value = m;
+                catInput.value = item;
                 catResults.style.display = 'none';
             };
             catResults.appendChild(div);
         });
         catResults.style.display = 'block';
+    } else { catResults.style.display = 'none'; }
+});
+
+document.addEventListener('click', (e) => {
+    if (!catInput.contains(e.target)) catResults.style.display = 'none';
+});
+
+document.getElementById('master_id').addEventListener('input', function() {
+    const mid = this.value;
+    const display = document.getElementById('album_display');
+    if (mid.length > 0) {
+        fetch(`/api/get_album_name?id=${mid}`)
+            .then(response => response.json())
+            .then(data => {
+                display.innerText = data.album;
+                display.style.color = (data.album === 'ID NOT FOUND') ? '#d9534f' : '#28a745';
+            });
     } else {
-        catResults.style.display = 'none';
+        display.innerText = 'Enter ID to look up...';
+        display.style.color = '#888';
     }
 });
 
-// Close list if clicked outside
-document.addEventListener('click', function(e) {
-    if (e.target !== catSearch) catResults.style.display = 'none';
+window.addEventListener('load', () => {
+    document.getElementById('interaction_date').value = new Date().toISOString().split('T')[0];
 });
 </script>
 {% endblock %}

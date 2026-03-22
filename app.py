@@ -4,6 +4,7 @@ import pymysql
 app = Flask(__name__)
 app.secret_key = "secret_archive_key"
 
+# Database Configuration (Using pymysql as per your last night's sync)
 db_config = {
     'host': 'localhost',
     'user': 'music_user',
@@ -19,7 +20,7 @@ def get_db_connection():
 def index():
     return render_template('index.html')
 
-# --- MASTER VIEWER ---
+# --- MASTER VIEWER (Combined Core Logic) ---
 @app.route('/view_master')
 def view_master():
     sid = request.args.get('id')
@@ -30,7 +31,7 @@ def view_master():
         albums_list = cursor.fetchall()
         
         if sid:
-            # Main Master Query - Includes Core Data, Notes, and Technical Joins
+            # Main Master Query
             query = """
                 SELECT m.id, art.artist, alb.album, lab.label, cat.catalogue_number, 
                        fmt.physical_format_type, yr.release_year AS original_year, m.this_release_year,
@@ -189,6 +190,17 @@ def manage_interactions():
     conn.close()
     return render_template('manage_interactions.html', types=t, cats=c, formats=f, bits=b, rates=s)
 
+@app.route('/api/get_album_name')
+def get_album_name():
+    mid = request.args.get('id')
+    conn = get_db_connection()
+    with conn.cursor() as cursor:
+        query = "SELECT a.album FROM lookup_album a JOIN master_release_entry m ON a.album_id = m.album_id WHERE m.id = %s"
+        cursor.execute(query, (mid,))
+        res = cursor.fetchone()
+    conn.close()
+    return jsonify({'album': res['album'] if res else 'ID NOT FOUND'})
+
 @app.route('/control_panel/interactions/save', methods=['POST'])
 def save_interaction():
     d = request.form
@@ -204,6 +216,27 @@ def save_interaction():
     conn.close()
     flash("Interaction Logged!", "success")
     return redirect(url_for('manage_interactions'))
+
+# --- NEW REPORT ROUTE ---
+@app.route('/reports/top_listened')
+def report_top_listened():
+    conn = get_db_connection()
+    with conn.cursor() as cursor:
+        query = """
+            SELECT art.artist, alb.album, COUNT(log.id) as play_count
+            FROM media_interaction_log log
+            JOIN master_release_entry m ON log.master_release_entry_id = m.id
+            JOIN lookup_artist art ON m.artist_id = art.id
+            JOIN lookup_album alb ON m.album_id = alb.album_id
+            WHERE log.interaction_type_id = 1
+            GROUP BY art.artist, alb.album
+            ORDER BY play_count DESC
+            LIMIT 10
+        """
+        cursor.execute(query)
+        data = cursor.fetchall()
+    conn.close()
+    return render_template('report_top_listened.html', data=data)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
