@@ -1,28 +1,53 @@
 {% extends "layout.html" %}
-
 {% block content %}
-<div style="text-align: center; margin: 40px 0;">
-    <h1 style="font-size: 2.2rem; margin-bottom: 10px;">Music Archive Management</h1>
-    <p style="color: #666;">Select a module to begin library operations</p>
+<div class="search-section" style="text-align: center; padding: 40px 20px;">
+    <h1 style="font-size: 2.5rem; letter-spacing: 4px; color: #eee; margin-bottom: 10px;">PHYSICAL MUSIC ARCHIVE</h1>
+    <p style="color: #666; letter-spacing: 2px; font-size: 0.9rem; margin-bottom: 50px;">DATABASE SYSTEM v1.0</p>
+
+    <div class="details-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1000px; margin: 0 auto;">
+        
+        <div class="column">
+            <a href="/view_master" style="text-decoration: none;">
+                <div class="spec-box" style="padding: 40px 20px; transition: all 0.3s ease;">
+                    <i class="fas fa-compact-disc" style="font-size: 3rem; color: #28a745; margin-bottom: 20px;"></i>
+                    <h2 style="color: #eee; letter-spacing: 2px;">VIEW MASTER</h2>
+                    <p style="color: #666; font-size: 0.8rem; margin-top: 10px;">Search and browse the full collection.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="column">
+            <a href="/reports_labels" style="text-decoration: none;">
+                <div class="spec-box" style="padding: 40px 20px; transition: all 0.3s ease;">
+                    <i class="fas fa-print" style="font-size: 3rem; color: #28a745; margin-bottom: 20px;"></i>
+                    <h2 style="color: #eee; letter-spacing: 2px;">REPORTS & LABELS</h2>
+                    <p style="color: #666; font-size: 0.8rem; margin-top: 10px;">Analytics, charts, and printable media labels.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="column">
+            <a href="/control_panel" style="text-decoration: none;">
+                <div class="spec-box" style="padding: 40px 20px; transition: all 0.3s ease;">
+                    <i class="fas fa-sliders-h" style="font-size: 3rem; color: #28a745; margin-bottom: 20px;"></i>
+                    <h2 style="color: #eee; letter-spacing: 2px;">CONTROL PANEL</h2>
+                    <p style="color: #666; font-size: 0.8rem; margin-top: 10px;">Manage metadata and system interactions.</p>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+    <div style="margin-top: 60px;">
+        <p style="color: #333; font-size: 0.7rem; letter-spacing: 1px;">CONNECTED TO: PHYSICAL_MUSIC_DB</p>
+    </div>
 </div>
 
-<div class="landing-grid">
-    <a href="/view_master" class="nav-card">
-        <i class="fas fa-search-plus"></i>
-        <h2>VIEW MASTER RELEASE</h2>
-        <p>Explore library, view versions, and check history</p>
-    </a>
-
-    <a href="/control_panel" class="nav-card">
-        <i class="fas fa-sliders-h"></i>
-        <h2>CONTROL PANEL</h2>
-        <p>Add new releases and log interactions</p>
-    </a>
-
-    <a href="#" class="nav-card">
-        <i class="fas fa-file-invoice"></i>
-        <h2>REPORTS AND LABELS</h2>
-        <p>Generate lists and print disc labels</p>
-    </a>
-</div>
+<style>
+    .spec-box:hover {
+        border-color: #28a745;
+        transform: translateY(-5px);
+        background: #111;
+    }
+</style>
 {% endblock %}

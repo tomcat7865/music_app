@@ -4,7 +4,6 @@ import pymysql
 app = Flask(__name__)
 app.secret_key = "secret_archive_key"
 
-# Database Configuration (Using pymysql as per your last night's sync)
 db_config = {
     'host': 'localhost',
     'user': 'music_user',
@@ -20,7 +19,7 @@ def get_db_connection():
 def index():
     return render_template('index.html')
 
-# --- MASTER VIEWER (Combined Core Logic) ---
+# --- MASTER VIEWER ---
 @app.route('/view_master')
 def view_master():
     sid = request.args.get('id')
@@ -31,7 +30,6 @@ def view_master():
         albums_list = cursor.fetchall()
         
         if sid:
-            # Main Master Query
             query = """
                 SELECT m.id, art.artist, alb.album, lab.label, cat.catalogue_number, 
                        fmt.physical_format_type, yr.release_year AS original_year, m.this_release_year,
@@ -64,7 +62,6 @@ def view_master():
             cursor.execute(query, (sid,))
             result = cursor.fetchone()
 
-            # Other Versions Query
             ov_query = """
                 SELECT ov.id, b.bit_depth, s.sample_rate, df.digital_format_type, 
                        y.release_year, l.label, c.catalogue_number, 
@@ -85,7 +82,6 @@ def view_master():
             cursor.execute(ov_query, (sid,))
             other_versions = cursor.fetchall()
 
-            # Interactions Query
             int_query = """
                 SELECT log.id, log.interaction_date, it.interaction_type, 
                        cat.catalogue_number, pft.physical_format_type, 
@@ -106,78 +102,84 @@ def view_master():
     return render_template('view_master.html', result=result, albums_list=albums_list, 
                            other_versions=other_versions, interactions=interactions)
 
-# --- CONTROL PANEL NAVIGATION ---
+# --- NAVIGATION ---
 @app.route('/control_panel')
 def control_panel_home():
     return render_template('control_panel_menu.html')
 
-@app.route('/control_panel/artists', methods=['GET', 'POST'])
-def manage_artists():
-    conn, res, q = get_db_connection(), [], request.form.get('artist_search', '')
+@app.route('/reports_labels')
+def reports_labels_home():
+    return render_template('reports_labels_menu.html')
+
+# --- REPORTS ---
+@app.route('/reports/top_100')
+def report_top_100():
+    conn = get_db_connection()
     with conn.cursor() as cursor:
+        query = """
+            SELECT art.artist, alb.album, COUNT(log.id) as play_count
+            FROM media_interaction_log log
+            JOIN master_release_entry m ON log.master_release_entry_id = m.id
+            JOIN lookup_artist art ON m.artist_id = art.id
+            JOIN lookup_album alb ON m.album_id = alb.album_id
+            WHERE log.interaction_type_id = 1
+            GROUP BY art.artist, alb.album
+            ORDER BY play_count DESC
+            LIMIT 100
+        """
+        cursor.execute(query)
+        data = cursor.fetchall()
+    conn.close()
+    return render_template('report_top_listened.html', data=data, title="TOP 100 PLAYED ALBUMS")
+
+@app.route('/reports/unplayed')
+def report_unplayed():
+    conn = get_db_connection()
+    with conn.cursor() as cursor:
+        query = """
+            SELECT art.artist, alb.album
+            FROM master_release_entry m
+            JOIN lookup_artist art ON m.artist_id = art.id
+            JOIN lookup_album alb ON m.album_id = alb.album_id
+            LEFT JOIN media_interaction_log log ON m.id = log.master_release_entry_id AND log.interaction_type_id = 1
+            WHERE log.id IS NULL
+            ORDER BY art.artist, alb.album
+        """
+        cursor.execute(query)
+        data = cursor.fetchall()
+    conn.close()
+    return render_template('report_unplayed.html', data=data)
+
+@app.route('/reports/by_artist', methods=['GET', 'POST'])
+def report_by_artist():
+    conn = get_db_connection()
+    selected_artist_id = request.form.get('artist_id')
+    data, artists = [], []
+    
+    with conn.cursor() as cursor:
+        # Always fetch artist list for the dropdown
         cursor.execute("SELECT id, artist FROM lookup_artist ORDER BY artist ASC")
-        all_art = cursor.fetchall()
-        if request.method == 'POST' and q:
-            cursor.execute("SELECT id, artist FROM lookup_artist WHERE artist LIKE %s", (f"%{q}%",))
-            res = cursor.fetchall()
+        artists = cursor.fetchall()
+        
+        # If an artist was selected, fetch their albums
+        if selected_artist_id:
+            query = """
+                SELECT art.artist, alb.album, cat.catalogue_number, fmt.physical_format_type
+                FROM master_release_entry m
+                JOIN lookup_artist art ON m.artist_id = art.id
+                JOIN lookup_album alb ON m.album_id = alb.album_id
+                LEFT JOIN lookup_catalogue_no cat ON m.catalogue_no_id = cat.id
+                LEFT JOIN lookup_physical_format_type fmt ON m.physical_format_type_id = fmt.id
+                WHERE art.id = %s
+                ORDER BY alb.album ASC
+            """
+            cursor.execute(query, (selected_artist_id,))
+            data = cursor.fetchall()
+            
     conn.close()
-    return render_template('manage_artists.html', all_artists=all_art, search_results=res, search_query=q)
+    return render_template('report_by_artist.html', data=data, artists=artists, selected_id=selected_artist_id)
 
-@app.route('/control_panel/albums', methods=['GET', 'POST'])
-def manage_albums():
-    conn, res, q = get_db_connection(), [], request.form.get('album_search', '')
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT album_id AS id, album FROM lookup_album ORDER BY album ASC")
-        all_alb = cursor.fetchall()
-        if request.method == 'POST' and q:
-            cursor.execute("SELECT album_id AS id, album FROM lookup_album WHERE album LIKE %s", (f"%{q}%",))
-            res = cursor.fetchall()
-    conn.close()
-    return render_template('manage_albums.html', all_albums=all_alb, search_results=res, search_query=q)
-
-@app.route('/control_panel/labels', methods=['GET', 'POST'])
-def manage_labels():
-    conn, res, q = get_db_connection(), [], request.form.get('label_search', '')
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT id, label FROM lookup_label ORDER BY label ASC")
-        all_lab = cursor.fetchall()
-        if request.method == 'POST' and q:
-            cursor.execute("SELECT id, label FROM lookup_label WHERE label LIKE %s", (f"%{q}%",))
-            res = cursor.fetchall()
-    conn.close()
-    return render_template('manage_labels.html', all_labels=all_lab, search_results=res, search_query=q)
-
-@app.route('/control_panel/catalogue_numbers')
-def manage_catalogue_numbers():
-    conn = get_db_connection()
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT id, catalogue_number FROM lookup_catalogue_no ORDER BY catalogue_number ASC")
-        c = cursor.fetchall()
-    conn.close()
-    return render_template('manage_catalogue_numbers.html', cat_nos=c)
-
-@app.route('/control_panel/locations')
-def manage_locations():
-    conn = get_db_connection()
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT id, storage_location FROM lookup_storage_location ORDER BY storage_location ASC")
-        l = cursor.fetchall()
-    conn.close()
-    return render_template('manage_locations.html', locations=l)
-
-@app.route('/control_panel/media_specs')
-def manage_media_specs():
-    conn = get_db_connection()
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT id, disc_brand FROM lookup_disc_brand ORDER BY disc_brand ASC")
-        b = cursor.fetchall()
-        cursor.execute("SELECT id1 AS id, cdr_code FROM lookup_cdr_code ORDER BY cdr_code ASC")
-        c = cursor.fetchall()
-        cursor.execute("SELECT id, bdr_dvdr_code FROM lookup_bdr_dvdr_code ORDER BY bdr_dvdr_code ASC")
-        d = cursor.fetchall()
-    conn.close()
-    return render_template('manage_media_specs.html', brands=b, cdr_codes=c, dvd_codes=d)
-
+# --- INTERACTIONS ---
 @app.route('/control_panel/interactions')
 def manage_interactions():
     conn = get_db_connection()
@@ -216,27 +218,6 @@ def save_interaction():
     conn.close()
     flash("Interaction Logged!", "success")
     return redirect(url_for('manage_interactions'))
-
-# --- NEW REPORT ROUTE ---
-@app.route('/reports/top_listened')
-def report_top_listened():
-    conn = get_db_connection()
-    with conn.cursor() as cursor:
-        query = """
-            SELECT art.artist, alb.album, COUNT(log.id) as play_count
-            FROM media_interaction_log log
-            JOIN master_release_entry m ON log.master_release_entry_id = m.id
-            JOIN lookup_artist art ON m.artist_id = art.id
-            JOIN lookup_album alb ON m.album_id = alb.album_id
-            WHERE log.interaction_type_id = 1
-            GROUP BY art.artist, alb.album
-            ORDER BY play_count DESC
-            LIMIT 10
-        """
-        cursor.execute(query)
-        data = cursor.fetchall()
-    conn.close()
-    return render_template('report_top_listened.html', data=data)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

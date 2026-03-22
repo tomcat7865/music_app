@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="/" style="color: #666; text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to Archive</a>
+</div>
+
+<div class="search-section">
+    <h1><i class="fas fa-print"></i> Reports & Labels</h1>
+    
+    <h2 style="color: #444; border-bottom: 1px solid #222; padding-bottom: 10px; margin-top: 40px;">
+        <i class="fas fa-chart-line" style="margin-right: 10px;"></i> Collection Analytics
+    </h2>
+    <div class="details-grid">
+        <div class="column">
+            <a href="/reports/top_100" style="text-decoration: none;">
+                <div class="spec-box" style="text-align: center;">
+                    <i class="fas fa-trophy" style="font-size: 2rem; color: #ffc107; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 10px 0; color: #eee;">Top 100 Played</h3>
+                    <p style="font-size: 0.8rem; color: #666;">Most played albums in rotation.</p>
+                </div>
+            </a>
+        </div>
+        <div class="column">
+            <a href="/reports/unplayed" style="text-decoration: none;">
+                <div class="spec-box" style="text-align: center;">
+                    <i class="fas fa-ghost" style="font-size: 2rem; color: #666; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 10px 0; color: #eee;">Unplayed Gems</h3>
+                    <p style="font-size: 0.8rem; color: #666;">Albums with 0 logged plays.</p>
+                </div>
+            </a>
+        </div>
+        <div class="column">
+            <a href="/reports/by_artist" style="text-decoration: none;">
+                <div class="spec-box" style="text-align: center;">
+                    <i class="fas fa-users" style="font-size: 2rem; color: #444; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 10px 0; color: #eee;">Albums by Artist</h3>
+                    <p style="font-size: 0.8rem; color: #666;">Full inventory breakdown.</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <h2 style="color: #444; border-bottom: 1px solid #222; padding-bottom: 10px; margin-top: 50px;">
+        <i class="fas fa-tags" style="margin-right: 10px;"></i> Media Labels
+    </h2>
+    <div class="details-grid">
+        <div class="column">
+            <a href="/labels/inlay" style="text-decoration: none;">
+                <div class="spec-box" style="text-align: center; opacity: 0.5;">
+                    <i class="fas fa-file-invoice" style="font-size: 2rem; color: #444; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 10px 0; color: #eee;">Jewel Case Inlays</h3>
+                    <p style="font-size: 0.8rem; color: #666;">Printable case metadata.</p>
+                </div>
+            </a>
+        </div>
+        <div class="column">
+            <a href="/labels/avery" style="text-decoration: none;">
+                <div class="spec-box" style="text-align: center; opacity: 0.5;">
+                    <i class="fas fa-sticky-note" style="font-size: 2rem; color: #444; margin-bottom: 10px;"></i>
+                    <h3 style="margin: 10px 0; color: #eee;">Avery Labels</h3>
+                    <p style="font-size: 0.8rem; color: #666;">Small storage stickers.</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

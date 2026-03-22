@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="/reports_labels" style="color: #666; text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to Reports</a>
+</div>
+
+<div class="search-section">
+    <h2 style="color: #28a745; margin-bottom: 20px; letter-spacing: 2px;">ALBUMS BY ARTIST</h2>
+    
+    <form method="POST" id="artistFilterForm" style="margin-bottom: 30px; background: #111; padding: 20px; border-radius: 8px; border: 1px solid #333;">
+        <label style="color: #666; font-size: 0.8rem; display: block; margin-bottom: 10px;">SELECT ARTIST TO FILTER:</label>
+        <select name="artist_id" onchange="document.getElementById('artistFilterForm').submit()" style="width: 100%; background: #000; color: #eee; border: 1px solid #444; padding: 12px; border-radius: 4px; font-size: 1rem;">
+            <option value="">-- Choose an Artist --</option>
+            {% for artist in artists %}
+                <option value="{{ artist.id }}" {% if selected_id|string == artist.id|string %}selected{% endif %}>
+                    {{ artist.artist }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if data %}
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+        <thead>
+            <tr style="border-bottom: 2px solid #333; text-align: left; color: #444;">
+                <th style="padding: 10px;">ALBUM</th>
+                <th style="padding: 10px;">CAT NO.</th>
+                <th style="padding: 10px;">FORMAT</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+            <tr style="border-bottom: 1px solid #222;">
+                <td style="padding: 10px; color: #eee;">{{ item.album }}</td>
+                <td style="padding: 10px; color: #666;">{{ item.catalogue_number }}</td>
+                <td style="padding: 10px; color: #444; font-size: 0.75rem;">{{ item.physical_format_type }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% elif selected_id %}
+    <p style="color: #666; font-style: italic; margin-top: 20px;">No albums found for this artist.</p>
+    {% else %}
+    <p style="color: #666; font-style: italic; margin-top: 20px;">Select an artist above to see their inventory.</p>
+    {% endif %}
+</div>
+{% endblock %}
