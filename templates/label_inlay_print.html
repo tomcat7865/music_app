@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inlay Booklet - {{ m.artist }}</title>
+    <style>
+        @page { size: A4 landscape; margin: 0; }
+        body { background: white; color: black; font-family: "Arial Narrow", Arial, sans-serif; margin: 0; padding: 0; line-height: 1.0; }
+
+        .inlay-sheet {
+            width: 240mm;
+            height: 120mm;
+            border: 0.5pt solid #000;
+            margin: 5mm auto;
+            box-sizing: border-box;
+            position: relative;
+            /* Shifted padding: 6mm on left to avoid printer cut-off */
+            padding: 1.5mm 2mm 1.5mm 6mm; 
+            page-break-after: always;
+            display: block;
+        }
+
+        .fold-line {
+            position: absolute;
+            left: 120mm;
+            top: 0;
+            bottom: 0;
+            border-left: 1px dashed #ccc;
+            z-index: 10;
+        }
+
+        /* SECTION 1: MASTER DATA STRIP */
+        .section-1-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.2mm 1.5mm;
+            width: 100%;
+            margin-bottom: 1.5mm;
+            border-bottom: 0.6pt solid #000;
+            padding-bottom: 1mm;
+        }
+        .data-item { font-size: 7pt; }
+        .data-item b { font-size: 5.5pt; text-transform: uppercase; color: #666; }
+
+        /* SECTION 2: OTHER VERSIONS TABLE */
+        .section-2-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 6.5pt;
+            table-layout: fixed;
+            margin-bottom: 2mm;
+        }
+        .section-2-table th {
+            text-align: left;
+            font-size: 5.5pt;
+            text-transform: uppercase;
+            border-bottom: 0.5pt solid #000;
+            padding: 0.5mm 0.2mm;
+        }
+        .section-2-table td {
+            padding: 0.5mm 0.2mm;
+            border-bottom: 0.1pt solid #eee;
+            vertical-align: top;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Column Widths (Adjusted slightly for the new padding) */
+        .col-id { width: 6mm; }
+        .col-spec { width: 13mm; }
+        .col-fmt { width: 18mm; }
+        .col-lab { width: 23mm; }
+        .col-cat { width: 23mm; }
+        .col-yr { width: 8mm; }
+        .col-dur { width: 10mm; }
+        .col-dr { width: 6mm; }
+        .col-bk { width: 6mm; }
+        .col-comm { width: auto; white-space: normal !important; }
+
+        /* NOTES STYLING */
+        .notes-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8mm;
+            height: 100%;
+        }
+
+        .notes-box {
+            font-size: 7.5pt;
+            line-height: 1.2;
+            white-space: pre-wrap;
+        }
+
+        .section-label {
+            font-size: 5.5pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #666;
+            display: block;
+            margin-bottom: 1mm;
+            border-bottom: 0.4pt solid #eee;
+        }
+
+        .no-print { background: #333; color: white; padding: 10px; text-align: center; }
+        .btn { background: #28a745; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; }
+
+        @media print {
+            .no-print { display: none; }
+            .inlay-sheet { margin: 0; border: 0.5pt solid #000; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="no-print">
+    <button class="btn" onclick="window.print()">PRINT INLAY (DUPLEX)</button>
+    <p style="font-size: 11px; margin-top: 5px;">Scale: 100% | Padding offset applied for printer margins.</p>
+</div>
+
+<div class="inlay-sheet">
+    <div class="fold-line"></div>
+
+    <div class="section-1-grid">
+        <div class="data-item"><b>ID:</b> {{ m.id }}</div>
+        <div class="data-item"><b>ARTIST:</b> {{ m.artist }}</div>
+        <div class="data-item"><b>ALBUM:</b> {{ m.album }}</div>
+        <div class="data-item"><b>CAT NO:</b> {{ m.catalogue_number }}</div>
+        <div class="data-item"><b>LABEL:</b> {{ m.label }}</div>
+        <div class="data-item"><b>FORMAT:</b> {{ m.physical_format_type }}</div>
+        <div class="data-item"><b>AVG DR:</b> {{ m.average_dynamic_range }}</div>
+        <div class="data-item"><b>RETAIL:</b> {{ m.retail_disc }}</div>
+        <div class="data-item"><b>ORIG YR:</b> {{ m.original_year }}</div>
+        <div class="data-item"><b>DUR:</b> {{ m.this_release_duration }}</div>
+        <div class="data-item"><b>CDR BR:</b> {{ m.cdr_brand or '-' }}</div>
+        <div class="data-item"><b>CDR CD:</b> {{ m.cdr_code or '-' }}</div>
+        <div class="data-item"><b>REL YR:</b> {{ m.this_release_year }}</div>
+        <div class="data-item"><b>DUR-B:</b> {{ m.duration_less_bonus or '-' }}</div>
+        <div class="data-item"><b>DVD BR:</b> {{ m.dvdr_brand or '-' }}</div>
+        <div class="data-item"><b>DVD CD:</b> {{ m.dvdr_code or '-' }}</div>
+        <div class="data-item"><b>CREATED:</b> {{ m.disc_creation_date or '-' }}</div>
+        <div class="data-item"><b>SIDE CHG:</b> {{ m.side_change_point or '-' }}</div>
+    </div>
+
+    <table class="section-2-table">
+        <thead>
+            <tr>
+                <th class="col-id">ID</th>
+                <th class="col-spec">SPEC</th>
+                <th class="col-fmt">FORMAT</th>
+                <th class="col-lab">LABEL</th>
+                <th class="col-cat">CAT NO</th>
+                <th class="col-yr">YEAR</th>
+                <th class="col-fmt">PHYSICAL</th>
+                <th class="col-dur">DUR</th>
+                <th class="col-dr">DR</th>
+                <th class="col-bk">BKL</th>
+                <th class="col-comm">COMMENT</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in versions %}
+            <tr>
+                <td>{{ v.id }}</td>
+                <td>{{ v.bit_depth }}/{{ v.sample_rate }}</td>
+                <td>{{ v.digital_format_type }}</td>
+                <td>{{ v.label }}</td>
+                <td>{{ v.catalogue_number }}</td>
+                <td>{{ v.this_release_year }}</td>
+                <td>{{ v.physical_format_type }}</td>
+                <td>{{ v.duration }}</td>
+                <td>{{ v.average_dynamic_range }}</td>
+                <td>{{ v.booklet_available }}</td>
+                <td class="col-comm">{{ v.individual_comment }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="notes-box" style="border-top: 0.6pt solid #000; padding-top: 1mm;">
+        <span class="section-label">NOTES 1</span>
+        {{ m.notes_1 or '---' }}
+    </div>
+</div>
+
+<div class="inlay-sheet">
+    <div class="fold-line"></div>
+    <div class="notes-container">
+        <div class="notes-box">
+            <span class="section-label">NOTES 2</span>
+            {{ m.notes_2 or '---' }}
+        </div>
+        <div class="notes-box">
+            <span class="section-label">NOTES 3</span>
+            {{ m.notes_3 or '---' }}
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

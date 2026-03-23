@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="/reports_labels" style="color: #666; text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to Reports</a>
+</div>
+
+<div class="search-section" style="max-width: 800px; margin: 0 auto; background: #1a1a1a; padding: 30px; border-radius: 8px; border: 1px solid #333;">
+    <h2 style="color: #28a745; margin-bottom: 20px; letter-spacing: 1px; text-align: center; text-transform: uppercase;">Generate Jewel Case Inlay</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        
+        <div style="border-right: 1px solid #333; padding-right: 30px;">
+            <h3 style="font-size: 0.8rem; color: #888; margin-bottom: 15px; text-transform: uppercase;">Option A: Enter Master ID</h3>
+            <form action="" method="GET" onsubmit="window.location.href='/labels/inlay/generate/' + document.getElementById('master_id').value; return false;">
+                <input type="number" id="master_id" placeholder="e.g. 104" required 
+                       style="width: 100%; padding: 12px; background: #000; border: 1px solid #444; color: #fff; margin-bottom: 15px; border-radius: 4px; box-sizing: border-box;">
+                <button type="submit" style="width: 100%; background: #28a745; color: white; border: none; padding: 12px; cursor: pointer; border-radius: 4px; font-weight: bold; text-transform: uppercase; transition: opacity 0.2s;">
+                    Go to Inlay
+                </button>
+            </form>
+        </div>
+
+        <div>
+            <h3 style="font-size: 0.8rem; color: #888; margin-bottom: 15px; text-transform: uppercase;">Option B: Select by Album</h3>
+            <form action="" method="GET" onsubmit="var sid = document.getElementById('album_select').value; if(sid){ window.location.href='/labels/inlay/generate/' + sid; } return false;">
+                <select id="album_select" required style="width: 100%; padding: 12px; background: #000; border: 1px solid #444; color: #fff; margin-bottom: 15px; border-radius: 4px; box-sizing: border-box;">
+                    <option value="">-- Choose Album --</option>
+                    {% for master in masters %}
+                    <option value="{{ master.id }}">{{ master.album }} (ID: {{ master.id }})</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" style="width: 100%; background: #28a745; color: white; border: none; padding: 12px; cursor: pointer; border-radius: 4px; font-weight: bold; text-transform: uppercase; transition: opacity 0.2s;">
+                    Generate from Selection
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
