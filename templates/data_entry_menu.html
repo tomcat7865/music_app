@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="/" style="color: #666; text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to Main Menu</a>
+</div>
+
+<div class="search-section" style="max-width: 900px; margin: 0 auto;">
+    <h1 style="color: #28a745; margin-bottom: 10px; letter-spacing: 2px;">ADD/EDIT RELEASE</h1>
+    <p style="color: #666; margin-bottom: 40px; font-size: 0.9rem;">Select the record type you wish to create or update in the archive.</p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+        
+        <div style="background: #111; padding: 30px; border-radius: 8px; border: 1px solid #222; border-top: 4px solid #28a745; transition: transform 0.2s ease;">
+            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <i class="fas fa-compact-disc" style="font-size: 2rem; color: #28a745; margin-right: 15px;"></i>
+                <h2 style="color: #eee; font-size: 1.2rem; margin: 0; text-transform: uppercase; letter-spacing: 1px;">Master Record</h2>
+            </div>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.5; margin-bottom: 25px;">
+                Primary entry for an album. Includes artist, label, original release year, and core technical specs.
+            </p>
+            <a href="/data_entry/master" style="display: block; width: 100%; background: #28a745; color: white; text-align: center; padding: 12px; border-radius: 4px; text-decoration: none; font-weight: bold; text-transform: uppercase; font-size: 0.85rem;">
+                Open Master Form
+            </a>
+        </div>
+
+        <div style="background: #111; padding: 30px; border-radius: 8px; border: 1px solid #222; border-top: 4px solid #28a745; transition: transform 0.2s ease;">
+            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <i class="fas fa-clone" style="font-size: 2rem; color: #28a745; margin-right: 15px;"></i>
+                <h2 style="color: #eee; font-size: 1.2rem; margin: 0; text-transform: uppercase; letter-spacing: 1px;">Other Version</h2>
+            </div>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.5; margin-bottom: 25px;">
+                Create variants (Digital, CD-R, Hi-Res) linked to an existing Master. Manage bit depths and sample rates.
+            </p>
+            <a href="/data_entry/version" style="display: block; width: 100%; background: #28a745; color: white; text-align: center; padding: 12px; border-radius: 4px; text-decoration: none; font-weight: bold; text-transform: uppercase; font-size: 0.85rem;">
+                Open Version Form
+            </a>
+        </div>
+
+    </div>
+
+    <div style="margin-top: 40px; padding: 20px; background: rgba(40, 167, 69, 0.05); border: 1px dashed #28a745; border-radius: 8px;">
+        <p style="color: #28a745; font-size: 0.8rem; margin: 0; line-height: 1.4;">
+            <i class="fas fa-shield-alt"></i> <strong>Data Integrity Note:</strong> Ensure the Artist and Album exist in the Control Panel before creating a new Master Record. Other Versions must be linked to a valid Master ID.
+        </p>
+    </div>
+</div>
+
+<style>
+    div[style*="background: #111"]:hover {
+        transform: translateY(-5px);
+        border-color: #28a745 !important;
+    }
+</style>
+{% endblock %}

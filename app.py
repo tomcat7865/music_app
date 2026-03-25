@@ -1,28 +1,31 @@
-from flask import Flask, render_template, flash, request
+from flask import Flask, render_template, flash, request, redirect, url_for
 from routes.view_master import view_master_func
 from routes.control_panel import (
     control_panel_home_func, manage_artists_func, save_artist_func,
-    manage_albums_func, save_album_func, manage_labels_func, 
+    manage_albums_func, save_album_func, manage_labels_func,
     save_label_func, manage_locations_func, save_location_func,
     manage_catalogue_numbers_func, save_catalogue_number_func,
     manage_interactions_func, save_interaction_func,
     manage_media_specs_func, save_media_spec_func, get_album_name_func
 )
 from routes.reports_labels import (
-    reports_home_func, 
-    label_inlay_selection_func,
-    label_storage_selection_func,
-    generate_storage_label_func, 
-    generate_inlay_func,
-    report_top_100_func,
-    report_unplayed_func,
-    report_by_artist_func,
-    storage_master_batch_func,
-    storage_version_batch_func
+    reports_home_func, label_inlay_selection_func,
+    label_storage_selection_func, generate_storage_label_func,
+    generate_inlay_func, report_top_100_func,
+    report_unplayed_func, report_by_artist_func,
+    storage_master_batch_func, storage_version_batch_func
+)
+from routes.data_entry import (
+    data_entry_home_func, manage_master_func, manage_version_func, 
+    save_master_func, get_master_details_func  # Added this
 )
 
 app = Flask(__name__)
 app.secret_key = "secret_archive_key"
+
+# --- MAIN INDEX ---
+@app.route('/')
+def index(): return render_template('index.html')
 
 # --- VIEW MASTER ---
 @app.route('/view_master')
@@ -93,14 +96,12 @@ def generate_storage_label(master_id): return generate_storage_label_func(master
 @app.route('/labels/inlay/generate/<int:master_id>')
 def generate_inlay(master_id): return generate_inlay_func(master_id)
 
-# Batch Routes
 @app.route('/labels/storage/master/batch', methods=['GET', 'POST'])
 def storage_master_batch(): return storage_master_batch_func()
 
 @app.route('/labels/storage/version/batch', methods=['GET', 'POST'])
 def storage_version_batch(): return storage_version_batch_func()
 
-# Reports
 @app.route('/reports/top_100')
 def report_top_100(): return report_top_100_func()
 
@@ -110,8 +111,22 @@ def report_unplayed(): return report_unplayed_func()
 @app.route('/reports/by_artist', methods=['GET', 'POST'])
 def report_by_artist(): return report_by_artist_func()
 
-@app.route('/')
-def index(): return render_template('index.html')
+# --- DATA ENTRY ---
+@app.route('/data_entry')
+def data_entry_home(): return data_entry_home_func()
 
+@app.route('/data_entry/master', methods=['GET', 'POST'])
+def manage_master(): return manage_master_func()
+
+@app.route('/data_entry/version', methods=['GET', 'POST'])
+def manage_version(): return manage_version_func()
+
+@app.route('/data_entry/master/save', methods=['POST'])
+def save_master(): return save_master_func()
+
+@app.route('/api/get_master_details')
+def get_master_details(): return get_master_details_func()
+
+# --- START THE APP ---
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
