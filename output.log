@@ -4,11 +4,118 @@ nohup: ignoring input
    WARNING: This is a development server. Do not use it in a production deployment.
    Use a production WSGI server instead.
  * Debug mode: on
-Traceback (most recent call last):
-  File "/home/pi/music_app/app.py", line 108, in <module>
-    app.run(host='0.0.0.0', port=5000, debug=True)
-  File "/usr/lib/python3/dist-packages/flask/app.py", line 990, in run
-    run_simple(host, port, self, **options)
-  File "/usr/lib/python3/dist-packages/werkzeug/serving.py", line 1034, in run_simple
-    s.bind(server_address)
-OSError: [Errno 98] Address already in use
+ * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 322-329-930
+192.168.1.2 - - [23/Mar/2026 01:01:49] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:01:52] "[37mGET /view_master HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:01:58] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:02:01] "[37mGET /reports_labels HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:02:21] "[37mGET /reports/by_artist HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:02:30] "[37mPOST /reports/by_artist HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:02:38] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:02:40] "[37mGET /view_master HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:02:50] "[37mGET /view_master?id=300 HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:03:12] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:03:14] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:03:17] "[37mGET /control_panel/interactions HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:03:29] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:03:30] "[37mGET /view_master HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:03:39] "[37mGET /view_master?id=300 HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:07] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:09] "[37mGET /reports_labels HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:14] "[37mGET /labels/inlay HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:29] "[37mGET /labels/inlay/generate/300 HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:44] "[37mGET /reports_labels HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:47] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:48] "[37mGET /view_master HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:50] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:51] "[37mGET /reports_labels HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:54] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:55] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:57] "[37mGET /control_panel/interactions HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:59] "[37mGET /api/get_album_name?id=3 HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:59] "[37mGET /api/get_album_name?id=30 HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:04:59] "[37mGET /api/get_album_name?id=300 HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:05:18] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:05:19] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:05:21] "[37mGET /view_master HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:05:24] "[37mGET /view_master?id=300 HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:05:49] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:05:51] "[37mGET /reports_labels HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:05:54] "[37mGET /reports/top_100 HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:06:43] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:06:45] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:06:46] "[37mGET /reports_labels HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:06:48] "[37mGET /reports/unplayed HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:08:06] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:08:08] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:08:09] "[37mGET /view_master HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:08:12] "[37mGET /view_master?id=363 HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:10:51] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:10:51] "[37mGET /static/style.css HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:10:51] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+192.168.1.2 - - [23/Mar/2026 01:10:53] "[37mGET /view_master HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:10:56] "[37mGET /view_master?id=237 HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:15:30] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:15:31] "[37mGET /reports_labels HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:15:32] "[37mGET /reports/top_100 HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:15:34] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:15:39] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:15:41] "[37mGET /reports_labels HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:15:42] "[37mGET /reports/unplayed HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:15:45] "[37mGET /reports/by_artist HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:16:51] "[37mGET /reports/top_100 HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:17:02] "[37mGET /reports/unplayed HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:17:16] "[37mGET /reports/by_artist HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:17:19] "[37mGET /labels/inlay HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:25:35] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:25:35] "[37mGET /static/style.css HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:25:35] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+192.168.1.2 - - [23/Mar/2026 01:25:44] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:25:48] "[37mGET /control_panel/locations HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:25:55] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:25:57] "[37mGET /control_panel/labels HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:26:06] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:26:08] "[37mGET /control_panel/artists HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:26:12] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:26:14] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:26:15] "[37mGET /control_panel/albums HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:26:23] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:26:25] "[37mGET /control_panel/media_specs HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:26:29] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:26:37] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:26:38] "[37mGET /reports_labels HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:26:45] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:26:56] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:26:58] "[37mGET /control_panel/artists HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:27:05] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:30:51] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:30:51] "[37mGET /static/style.css HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:30:52] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:30:54] "[37mGET /control_panel/artists HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:31:01] "[37mPOST /control_panel/artists HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:31:07] "[37mPOST /control_panel/artists HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 01:31:10] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:14:46] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:14:47] "[37mGET /static/style.css HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:14:47] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+192.168.1.2 - - [23/Mar/2026 22:14:48] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:14:50] "[37mGET /control_panel/artists HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:14:54] "[37mPOST /control_panel/artists HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:14:56] "[37mGET /control_panel/artists HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:14:59] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:15:00] "[37mGET /control_panel HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:15:01] "[37mGET /control_panel/albums HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:15:06] "[37mPOST /control_panel/albums HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:15:09] "[37mGET /control_panel/albums HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:15:13] "[37mGET /control_panel/labels HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:15:19] "[37mPOST /control_panel/labels HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:15:20] "[37mGET /control_panel/labels HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:15:24] "[37mGET /control_panel/catalogue_numbers HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:18:41] "[37mGET / HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:18:43] "[37mGET /view_master HTTP/1.1[0m" 200 -
+192.168.1.2 - - [23/Mar/2026 22:18:54] "[37mGET /view_master?id=322 HTTP/1.1[0m" 200 -
+ * Detected change in '/home/pi/music_app/app.py', reloading
+ * Restarting with stat
