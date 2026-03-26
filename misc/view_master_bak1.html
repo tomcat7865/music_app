@@ -2,29 +2,29 @@
 {% block content %}
 <style>
     /* 1. Remove number input spinners (odd icons) */
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
     }
     input[type=number] { -moz-appearance: textfield; }
 
     /* 2. Tightened vertical spacing for grid rows */
     .grid-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #222;
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        border-bottom: 1px solid #222; 
         padding: 8px 0; /* Shrunk a pinch from 12px */
     }
 
     /* Tab navigation styling */
     .tab-btn {
-        background: #333;
-        border: 1px solid #444;
+        background: #333; 
+        border: 1px solid #444; 
         color: #eee;
-        font-size: 0.6rem;
-        padding: 6px 4px;
+        font-size: 0.6rem; 
+        padding: 6px 4px; 
         flex: 1;
         cursor: pointer;
         border-radius: 4px;
@@ -64,59 +64,51 @@
 {% if result %}
 <div class="search-section" style="margin-bottom: 20px;">
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 60px;">
-        
-        <div class="grid-row">
-            <span style="color: #28a745; font-size: 0.8rem; letter-spacing: 1px; font-weight: bold;">MASTER ID</span>
-            <span style="color: #28a745; font-size: 1.1rem; font-weight: bold;">{{ result.id }}</span>
-        </div>
-        
-        <div class="grid-row">
-            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">DURATION</span>
-            <span style="color: #eee; font-size: 1.1rem;">{{ result.this_release_duration or '---' }}</span>
-        </div>
-
         <div class="grid-row">
             <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">ARTIST</span>
             <span style="color: #eee; font-size: 1.1rem;">{{ result.artist }}</span>
         </div>
         <div class="grid-row">
-            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">DUR (LESS BONUS)</span>
-            <span style="color: #eee; font-size: 1.1rem;">{{ result.duration_less_bonus or '---' }}</span>
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">DURATION</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.this_release_duration or '---' }}</span>
         </div>
         <div class="grid-row">
             <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">LABEL</span>
             <span style="color: #eee; font-size: 1.1rem;">{{ result.label or '---' }}</span>
         </div>
         <div class="grid-row">
-            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">SIDE CHANGE</span>
-            <span style="color: #eee; font-size: 1.1rem;">{{ result.side_change_point or '---' }}</span>
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">DUR (LESS BONUS)</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.duration_less_bonus or '---' }}</span>
         </div>
         <div class="grid-row">
             <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">CATALOGUE #</span>
             <span style="color: #eee; font-size: 1.1rem;">{{ result.catalogue_number or '---' }}</span>
         </div>
         <div class="grid-row">
-            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">AVG DR</span>
-            <span style="color: #eee; font-size: 1.1rem;">{{ result.average_dynamic_range or '---' }}</span>
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">SIDE CHANGE</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.side_change_point or '---' }}</span>
         </div>
         <div class="grid-row">
             <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">FORMAT</span>
             <span style="color: #eee; font-size: 1.1rem;">{{ result.physical_format_type or '---' }}</span>
         </div>
         <div class="grid-row">
-            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">LOCATION</span>
-            <span style="color: #eee; font-size: 1.1rem;">{{ result.storage_location or '---' }}</span>
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">AVG DR</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.average_dynamic_range or '---' }}</span>
         </div>
         <div class="grid-row">
             <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">ORIGINAL YEAR</span>
             <span style="color: #eee; font-size: 1.1rem;">{{ result.original_year or '---' }}</span>
         </div>
-        
+        <div class="grid-row">
+            <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">LOCATION</span>
+            <span style="color: #eee; font-size: 1.1rem;">{{ result.storage_location or '---' }}</span>
+        </div>
         <div class="grid-row">
             <span style="color: #666; font-size: 0.8rem; letter-spacing: 1px;">THIS RELEASE</span>
             <span style="color: #eee; font-size: 1.1rem;">{{ result.this_release_year or '---' }}</span>
         </div>
-
+        
         <div style="display: flex; gap: 8px; align-items: center; border-bottom: 1px solid #222; padding: 8px 0;">
             <button onclick="toggleTab('other-versions')" class="tab-btn">OTHER VERSIONS</button>
             <button onclick="toggleTab('notes')" class="tab-btn">NOTES</button>
@@ -263,10 +255,10 @@ function toggleTab(tabId) {
     const sections = document.querySelectorAll('.tab-content');
     const target = document.getElementById(tabId);
     const isVisible = target.style.display === 'block';
-
+    
     // Hide all
     sections.forEach(s => s.style.display = 'none');
-
+    
     // Toggle target
     target.style.display = isVisible ? 'none' : 'block';
 }

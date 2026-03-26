@@ -17,7 +17,8 @@ from routes.reports_labels import (
 )
 from routes.data_entry import (
     data_entry_home_func, manage_master_func, manage_version_func, 
-    save_master_func, get_master_details_func  # Added this
+    save_master_func, get_master_details_func,
+    save_version_func, get_version_details_func  # Added these two
 )
 
 app = Flask(__name__)
@@ -124,8 +125,14 @@ def manage_version(): return manage_version_func()
 @app.route('/data_entry/master/save', methods=['POST'])
 def save_master(): return save_master_func()
 
+@app.route('/data_entry/version/save', methods=['POST'])
+def save_version(): return save_version_func()
+
 @app.route('/api/get_master_details')
 def get_master_details(): return get_master_details_func()
+
+@app.route('/api/get_version_details')
+def get_version_details(): return get_version_details_func()
 
 # --- START THE APP ---
 if __name__ == '__main__':

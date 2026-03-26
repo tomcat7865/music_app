@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, flash, jsonify
 from database import get_db_connection
 from datetime import date, timedelta
 
-# 1. API FOR THE 'LOAD' BUTTON (Sandboxed here)
+# 1. API FOR LOAD BUTTONS & IDENTITY CHECKS
 def get_master_details_func():
     m_id = request.args.get('id')
     if not m_id:
@@ -10,26 +10,20 @@ def get_master_details_func():
 
     conn = get_db_connection()
     with conn.cursor() as cursor:
-        # Fetching everything from the master table
         cursor.execute("SELECT * FROM master_release_entry WHERE id = %s", (m_id,))
         result = cursor.fetchone()
 
         if result:
-            # FIX: Convert all 'non-serializable' objects to strings
             for key, value in result.items():
-                # Convert Dates (YYYY-MM-DD)
                 if isinstance(value, date):
                     result[key] = value.strftime('%Y-%m-%d')
-                # FIX: Convert Timedelta/Duration (00:00:00)
                 elif isinstance(value, timedelta):
-                    # This turns the time object into a clean string like "01:15:00"
                     total_seconds = int(value.total_seconds())
                     hours = total_seconds // 3600
                     minutes = (total_seconds % 3600) // 60
                     seconds = total_seconds % 60
                     result[key] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
-            # Fetch names for the header display verify
             cursor.execute("""
                 SELECT 
                     (SELECT artist FROM lookup_artist WHERE id = %s) as artist,
@@ -48,7 +42,7 @@ def get_master_details_func():
 def data_entry_home_func():
     return render_template('data_entry_menu.html')
 
-# 3. LOAD THE FORM (GET)
+# 3. MASTER RELEASE: MANAGE (GET)
 def manage_master_func():
     conn = get_db_connection()
     with conn.cursor() as cursor:
@@ -81,11 +75,10 @@ def manage_master_func():
                            formats=formats, years=years, yn=yn, brands=brands,
                            cdr_codes=cdr_codes, dvd_codes=dvd_codes, devices=devices)
 
-# 4. SAVE LOGIC (POST)
+# 4. MASTER RELEASE: SAVE (POST)
 def save_master_func():
     conn = get_db_connection()
     m_id = request.form.get('id')
-
     data = (
         request.form.get('artist_id'),
         request.form.get('album_id'),
@@ -107,26 +100,24 @@ def save_master_func():
         request.form.get('disc_creation_date') or None,
         request.form.get('disc_writing_device_id') or None
     )
-
     try:
         with conn.cursor() as cursor:
             if m_id and m_id.isdigit():
                 sql = """
-                    UPDATE master_release_entry
+                    UPDATE master_release_entry 
                     SET artist_id=%s, album_id=%s, label_id=%s, catalogue_no_id=%s,
                         physical_format_type_id=%s, original_release_year_id=%s,
                         this_release_year=%s, this_release_duration=%s,
                         average_dynamic_range=%s, notes_1=%s, notes_2=%s, notes_3=%s,
                         retail_disc_id=%s, cdr_brand_id=%s, cdr_code_id=%s,
                         dvdr_brand_id=%s, dvdr_code_id=%s, disc_creation_date=%s,
-                        disc_writing_device_id=%s
-                    WHERE id=%s
+                        disc_writing_device_id=%s WHERE id=%s
                 """
                 cursor.execute(sql, data + (m_id,))
                 flash(f"RECORD {m_id} UPDATED", "success")
             else:
                 sql = """
-                    INSERT INTO master_release_entry
+                    INSERT INTO master_release_entry 
                     (artist_id, album_id, label_id, catalogue_no_id, physical_format_type_id,
                      original_release_year_id, this_release_year, this_release_duration,
                      average_dynamic_range, notes_1, notes_2, notes_3, retail_disc_id,
@@ -144,5 +135,99 @@ def save_master_func():
         conn.close()
     return redirect(url_for('manage_master'))
 
+# 5. OTHER VERSIONS: MANAGE (GET)
 def manage_version_func():
-    return render_template('manage_version.html')
+    conn = get_db_connection()
+    with conn.cursor() as cursor:
+        # Fetching all lookup data for the Version form
+        cursor.execute("SELECT id, bit_depth FROM lookup_bit_depth ORDER BY bit_depth")
+        bits = cursor.fetchall()
+        cursor.execute("SELECT id, sample_rate FROM lookup_sample_rate ORDER BY id")
+        rates = cursor.fetchall()
+        cursor.execute("SELECT id, digital_format_type FROM lookup_digital_format_type ORDER BY digital_format_type")
+        digi_formats = cursor.fetchall()
+        cursor.execute("SELECT id, label FROM lookup_label ORDER BY label")
+        labels = cursor.fetchall()
+        cursor.execute("SELECT id, catalogue_number FROM lookup_catalogue_no ORDER BY catalogue_number")
+        cats = cursor.fetchall()
+        cursor.execute("SELECT id, release_year FROM lookup_original_release_year ORDER BY release_year DESC")
+        years = cursor.fetchall()
+        cursor.execute("SELECT id, physical_format_type FROM lookup_physical_format_type ORDER BY physical_format_type")
+        phys_formats = cursor.fetchall()
+        cursor.execute("SELECT id, yes_no FROM lookup_yes_no")
+        yn = cursor.fetchall()
+        cursor.execute("SELECT id, storage_location FROM lookup_storage_location ORDER BY storage_location")
+        locations = cursor.fetchall()
+
+    conn.close()
+    return render_template('manage_version.html', 
+                           bits=bits, rates=rates, digi_formats=digi_formats,
+                           labels=labels, cats=cats, years=years, 
+                           phys_formats=phys_formats, yn=yn, locations=locations)
+
+# 6. OTHER VERSIONS: SAVE (POST)
+def save_version_func():
+    conn = get_db_connection()
+    v_id = request.form.get('id')
+    # Following your map's field names exactly
+    data = (
+        request.form.get('master_release_entry_id'),
+        request.form.get('bit_depth_id') or None,
+        request.form.get('sample_rate_id') or None,
+        request.form.get('digital_format_type_id') or None,
+        request.form.get('label_id') or None,
+        request.form.get('catalogue_no_id') or None,
+        request.form.get('this_release_year_id') or None,
+        request.form.get('physical_format_type_id') or None,
+        request.form.get('duration'),
+        request.form.get('average_dynamic_range') or None,
+        request.form.get('booklet_available_id') or None,
+        request.form.get('individual_comment'),
+        request.form.get('storage_location_id') or None
+    )
+    try:
+        with conn.cursor() as cursor:
+            if v_id and v_id.isdigit():
+                sql = """
+                    UPDATE other_version_entry SET 
+                    master_release_entry_id=%s, bit_depth_id=%s, sample_rate_id=%s, 
+                    digital_format_type_id=%s, label_id=%s, catalogue_no_id=%s, 
+                    this_release_year_id=%s, physical_format_type_id=%s, duration=%s, 
+                    average_dynamic_range=%s, booklet_available_id=%s, 
+                    individual_comment=%s, storage_location_id=%s WHERE id=%s
+                """
+                cursor.execute(sql, data + (v_id,))
+                flash(f"VERSION {v_id} UPDATED", "success")
+            else:
+                sql = """
+                    INSERT INTO other_version_entry 
+                    (master_release_entry_id, bit_depth_id, sample_rate_id, 
+                     digital_format_type_id, label_id, catalogue_no_id, 
+                     this_release_year_id, physical_format_type_id, duration, 
+                     average_dynamic_range, booklet_available_id, 
+                     individual_comment, storage_location_id) 
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                """
+                cursor.execute(sql, data)
+                flash("NEW VERSION ADDED", "success")
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        flash(f"DB ERROR: {str(e)}", "danger")
+    finally:
+        conn.close()
+    return redirect(url_for('manage_version'))
+
+# 7. API FOR VERSION LOAD
+def get_version_details_func():
+    v_id = request.args.get('id')
+    conn = get_db_connection()
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT * FROM other_version_entry WHERE id = %s", (v_id,))
+        result = cursor.fetchone()
+        if result and result.get('duration'):
+            # Convert duration to string if it's a timedelta
+            if isinstance(result['duration'], timedelta):
+                result['duration'] = str(result['duration'])
+    conn.close()
+    return jsonify(result) if result else jsonify({"error": "Not found"}), 404
