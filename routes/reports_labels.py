@@ -187,45 +187,60 @@ def storage_version_batch_func():
 
 def report_top_100_func():
     conn = get_db_connection()
-    with conn.cursor() as cursor:
-        # Aggregating play counts from the interaction log
-        query = """
-            SELECT art.artist, alb.album, COUNT(l.id) as play_count
-            FROM media_interaction_log l
-            JOIN master_release_entry m ON l.master_release_entry_id = m.id
-            JOIN lookup_artist art ON m.artist_id = art.id
-            JOIN lookup_album alb ON m.album_id = alb.album_id
-            GROUP BY m.id 
-            ORDER BY play_count DESC 
-            LIMIT 100
-        """
-        cursor.execute(query)
-        res = cursor.fetchall()
-    conn.close()
-    # Matches HTML: 'data' for the loop and 'title' for the header
-    return render_template('report_top_listened.html', 
-                           data=res, 
-                           title="TOP 100 MOST PLAYED ALBUMS")
+    try:
+        with conn.cursor() as cursor:
+            query = """
+                SELECT 
+                    m.id AS master_id,
+                    art.artist, 
+                    alb.album,
+                    COUNT(l.id) AS play_count
+                FROM master_release_entry m
+                JOIN lookup_artist art ON m.artist_id = art.id
+                JOIN lookup_album alb ON m.album_id = alb.album_id
+                JOIN media_interaction_log l ON m.id = l.master_release_entry_id
+                WHERE l.interaction_type_id = 1
+                GROUP BY m.id, art.artist, alb.album
+                ORDER BY play_count DESC
+                LIMIT 100
+            """
+            cursor.execute(query)
+            res = cursor.fetchall()
+    finally:
+        conn.close()
+    
+    # MATCH THE FILENAME HERE:
+    return render_template('report_top_listened.html',
+                           data=res,
+                           title="THE TOP 100 PLAYS")
 
 def report_unplayed_func():
     conn = get_db_connection()
-    with conn.cursor() as cursor:
-        # Finding Master IDs that do NOT exist in the media_interaction_log
-        query = """
-            SELECT art.artist, alb.album 
-            FROM master_release_entry m
-            JOIN lookup_artist art ON m.artist_id = art.id
-            JOIN lookup_album alb ON m.album_id = alb.album_id
-            LEFT JOIN media_interaction_log l ON m.id = l.master_release_entry_id
-            WHERE l.id IS NULL
-            ORDER BY art.artist ASC, alb.album ASC
-        """
-        cursor.execute(query)
-        res = cursor.fetchall()
-    conn.close()
-    # Assuming unplayed template uses similar 'data' variable
-    return render_template('report_unplayed.html', 
-                           data=res, 
+    try:
+        with conn.cursor() as cursor:
+            # CORRECTED: Using 'album_id' for the join as per your DB structure
+            query = """
+                SELECT 
+                    m.id AS master_id, 
+                    art.artist, 
+                    alb.album
+                FROM master_release_entry m
+                JOIN lookup_artist art ON m.artist_id = art.id
+                JOIN lookup_album alb ON m.album_id = alb.album_id
+                WHERE m.id NOT IN (
+                    SELECT DISTINCT master_release_entry_id 
+                    FROM media_interaction_log 
+                    WHERE interaction_type_id = 1
+                )
+                ORDER BY art.artist ASC, alb.album ASC
+            """
+            cursor.execute(query)
+            res = cursor.fetchall()
+    finally:
+        conn.close()
+    
+    return render_template('report_unplayed.html',
+                           data=res,
                            title="THE UNPLAYED GEMS")
 
 def report_by_artist_func():
