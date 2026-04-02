@@ -25,7 +25,7 @@ def get_master_details_func():
                     result[key] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
             cursor.execute("""
-                SELECT 
+                SELECT
                     (SELECT artist FROM lookup_artist WHERE id = %s) as artist,
                     (SELECT album FROM lookup_album WHERE album_id = %s) as album
             """, (result['artist_id'], result['album_id']))
@@ -68,17 +68,23 @@ def manage_master_func():
         dvd_codes = cursor.fetchall()
         cursor.execute("SELECT id, disc_writing_device FROM lookup_disc_writing_device ORDER BY disc_writing_device")
         devices = cursor.fetchall()
+        # ADDED: Fetch storage locations for the Master dropdown
+        cursor.execute("SELECT id, storage_location FROM lookup_storage_location ORDER BY storage_location")
+        locations = cursor.fetchall()
 
     conn.close()
     return render_template('manage_master.html',
                            artists=artists, albums=albums, labels=labels, cats=cats,
                            formats=formats, years=years, yn=yn, brands=brands,
-                           cdr_codes=cdr_codes, dvd_codes=dvd_codes, devices=devices)
+                           cdr_codes=cdr_codes, dvd_codes=dvd_codes, devices=devices,
+                           locations=locations)
 
 # 4. MASTER RELEASE: SAVE (POST)
 def save_master_func():
     conn = get_db_connection()
     m_id = request.form.get('id')
+    
+    # Mapped all fields including your 5 new additions
     data = (
         request.form.get('artist_id'),
         request.form.get('album_id'),
@@ -88,42 +94,49 @@ def save_master_func():
         request.form.get('original_release_year_id') or None,
         request.form.get('this_release_year'),
         request.form.get('this_release_duration'),
+        request.form.get('duration_less_bonus'),      # New
+        request.form.get('side_change_point'),        # New
         request.form.get('average_dynamic_range') or None,
         request.form.get('notes_1'),
         request.form.get('notes_2'),
         request.form.get('notes_3'),
         request.form.get('retail_disc_id'),
+        request.form.get('storage_location_id') or None, # New
         request.form.get('cdr_brand_id') or None,
         request.form.get('cdr_code_id') or None,
-        request.form.get('dvdr_brand_id') or None,
+        request.form.get('dvdr_brand_id') or None,    # New
         request.form.get('dvdr_code_id') or None,
-        request.form.get('disc_creation_date') or None,
+        request.form.get('disc_creation_date') or None, # New
         request.form.get('disc_writing_device_id') or None
     )
+    
     try:
         with conn.cursor() as cursor:
             if m_id and m_id.isdigit():
                 sql = """
-                    UPDATE master_release_entry 
+                    UPDATE master_release_entry
                     SET artist_id=%s, album_id=%s, label_id=%s, catalogue_no_id=%s,
                         physical_format_type_id=%s, original_release_year_id=%s,
                         this_release_year=%s, this_release_duration=%s,
+                        duration_less_bonus=%s, side_change_point=%s,
                         average_dynamic_range=%s, notes_1=%s, notes_2=%s, notes_3=%s,
-                        retail_disc_id=%s, cdr_brand_id=%s, cdr_code_id=%s,
-                        dvdr_brand_id=%s, dvdr_code_id=%s, disc_creation_date=%s,
-                        disc_writing_device_id=%s WHERE id=%s
+                        retail_disc_id=%s, storage_location_id=%s, cdr_brand_id=%s, 
+                        cdr_code_id=%s, dvdr_brand_id=%s, dvdr_code_id=%s, 
+                        disc_creation_date=%s, disc_writing_device_id=%s 
+                    WHERE id=%s
                 """
                 cursor.execute(sql, data + (m_id,))
                 flash(f"RECORD {m_id} UPDATED", "success")
             else:
                 sql = """
-                    INSERT INTO master_release_entry 
+                    INSERT INTO master_release_entry
                     (artist_id, album_id, label_id, catalogue_no_id, physical_format_type_id,
                      original_release_year_id, this_release_year, this_release_duration,
+                     duration_less_bonus, side_change_point,
                      average_dynamic_range, notes_1, notes_2, notes_3, retail_disc_id,
-                     cdr_brand_id, cdr_code_id, dvdr_brand_id, dvdr_code_id,
-                     disc_creation_date, disc_writing_device_id)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                     storage_location_id, cdr_brand_id, cdr_code_id, dvdr_brand_id, 
+                     dvdr_code_id, disc_creation_date, disc_writing_device_id)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                 """
                 cursor.execute(sql, data)
                 flash("NEW MASTER CREATED", "success")
@@ -139,7 +152,6 @@ def save_master_func():
 def manage_version_func():
     conn = get_db_connection()
     with conn.cursor() as cursor:
-        # Fetching all lookup data for the Version form
         cursor.execute("SELECT id, bit_depth FROM lookup_bit_depth ORDER BY bit_depth")
         bits = cursor.fetchall()
         cursor.execute("SELECT id, sample_rate FROM lookup_sample_rate ORDER BY id")
@@ -160,16 +172,15 @@ def manage_version_func():
         locations = cursor.fetchall()
 
     conn.close()
-    return render_template('manage_version.html', 
+    return render_template('manage_version.html',
                            bits=bits, rates=rates, digi_formats=digi_formats,
-                           labels=labels, cats=cats, years=years, 
+                           labels=labels, cats=cats, years=years,
                            phys_formats=phys_formats, yn=yn, locations=locations)
 
 # 6. OTHER VERSIONS: SAVE (POST)
 def save_version_func():
     conn = get_db_connection()
     v_id = request.form.get('id')
-    # Following your map's field names exactly
     data = (
         request.form.get('master_release_entry_id'),
         request.form.get('bit_depth_id') or None,
@@ -189,23 +200,23 @@ def save_version_func():
         with conn.cursor() as cursor:
             if v_id and v_id.isdigit():
                 sql = """
-                    UPDATE other_version_entry SET 
-                    master_release_entry_id=%s, bit_depth_id=%s, sample_rate_id=%s, 
-                    digital_format_type_id=%s, label_id=%s, catalogue_no_id=%s, 
-                    this_release_year_id=%s, physical_format_type_id=%s, duration=%s, 
-                    average_dynamic_range=%s, booklet_available_id=%s, 
+                    UPDATE other_version_entry SET
+                    master_release_entry_id=%s, bit_depth_id=%s, sample_rate_id=%s,
+                    digital_format_type_id=%s, label_id=%s, catalogue_no_id=%s,
+                    this_release_year_id=%s, physical_format_type_id=%s, duration=%s,
+                    average_dynamic_range=%s, booklet_available_id=%s,
                     individual_comment=%s, storage_location_id=%s WHERE id=%s
                 """
                 cursor.execute(sql, data + (v_id,))
                 flash(f"VERSION {v_id} UPDATED", "success")
             else:
                 sql = """
-                    INSERT INTO other_version_entry 
-                    (master_release_entry_id, bit_depth_id, sample_rate_id, 
-                     digital_format_type_id, label_id, catalogue_no_id, 
-                     this_release_year_id, physical_format_type_id, duration, 
-                     average_dynamic_range, booklet_available_id, 
-                     individual_comment, storage_location_id) 
+                    INSERT INTO other_version_entry
+                    (master_release_entry_id, bit_depth_id, sample_rate_id,
+                     digital_format_type_id, label_id, catalogue_no_id,
+                     this_release_year_id, physical_format_type_id, duration,
+                     average_dynamic_range, booklet_available_id,
+                     individual_comment, storage_location_id)
                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                 """
                 cursor.execute(sql, data)
@@ -226,7 +237,6 @@ def get_version_details_func():
         cursor.execute("SELECT * FROM other_version_entry WHERE id = %s", (v_id,))
         result = cursor.fetchone()
         if result and result.get('duration'):
-            # Convert duration to string if it's a timedelta
             if isinstance(result['duration'], timedelta):
                 result['duration'] = str(result['duration'])
     conn.close()
