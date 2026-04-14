@@ -14,8 +14,8 @@
             margin: 5mm auto;
             box-sizing: border-box;
             position: relative;
-            /* Shifted padding: 6mm on left to avoid printer cut-off */
-            padding: 1.5mm 2mm 1.5mm 6mm; 
+            /* TWEAK: Increased top padding to 6mm to avoid printer cut-off */
+            padding: 6mm 2mm 1.5mm 6mm;
             page-break-after: always;
             display: block;
         }
@@ -65,8 +65,8 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
-        /* Column Widths (Adjusted slightly for the new padding) */
+
+        /* Column Widths */
         .col-id { width: 6mm; }
         .col-spec { width: 13mm; }
         .col-fmt { width: 18mm; }
@@ -88,7 +88,7 @@
 
         .notes-box {
             font-size: 7.5pt;
-            line-height: 1.2;
+            line-height: 1.1; /* Reduced slightly to save vertical space */
             white-space: pre-wrap;
         }
 
@@ -98,7 +98,7 @@
             text-transform: uppercase;
             color: #666;
             display: block;
-            margin-bottom: 1mm;
+            margin-bottom: 0.5mm; /* Tightened */
             border-bottom: 0.4pt solid #eee;
         }
 
@@ -115,7 +115,7 @@
 
 <div class="no-print">
     <button class="btn" onclick="window.print()">PRINT INLAY (DUPLEX)</button>
-    <p style="font-size: 11px; margin-top: 5px;">Scale: 100% | Padding offset applied for printer margins.</p>
+    <p style="font-size: 11px; margin-top: 5px;">Scale: 100% | Padding offset applied for top printer margins.</p>
 </div>
 
 <div class="inlay-sheet">
@@ -177,7 +177,7 @@
         </tbody>
     </table>
 
-    <div class="notes-box" style="border-top: 0.6pt solid #000; padding-top: 1mm;">
+    <div class="notes-box" style="border-top: 0.6pt solid #000; padding-top: 0.5mm;">
         <span class="section-label">NOTES 1</span>
         {{ m.notes_1 or '---' }}
     </div>

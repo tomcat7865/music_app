@@ -11,7 +11,8 @@
         .page {
             width: 210mm;
             height: 297mm;
-            padding: 5mm 4.5mm; 
+            /* TWEAK: Added 0.6mm top padding to offset printer creep */
+            padding: 5.6mm 4.5mm 5mm 4.5mm;
             display: grid;
             grid-template-columns: 99.1mm 99.1mm;
             grid-template-rows: repeat(5, 57.3mm);
@@ -23,7 +24,7 @@
         .label {
             width: 99.1mm;
             height: 57.3mm;
-            border: 0.1pt solid #eee; 
+            border: 0.1pt solid #eee;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -40,7 +41,7 @@
             padding: 2mm 4mm;
             text-transform: uppercase;
             border-bottom: 1.5pt solid #000;
-            -webkit-print-color-adjust: exact; /* Force color for PDF/Print */
+            -webkit-print-color-adjust: exact; 
         }
 
         .label-body {
@@ -50,20 +51,20 @@
             flex-direction: column;
         }
 
-        .artist-line { 
-            font-size: 15pt; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            line-height: 1.1; 
+        .artist-line {
+            font-size: 15pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            line-height: 1.1;
             margin-top: 1mm;
             white-space: nowrap;
             overflow: hidden;
         }
-        
-        .album-line { 
-            font-size: 12pt; 
-            margin-bottom: 2mm; 
-            border-bottom: 1px solid #000; 
+
+        .album-line {
+            font-size: 12pt;
+            margin-bottom: 2mm;
+            border-bottom: 1px solid #000;
             padding-bottom: 1mm;
             white-space: nowrap;
             overflow: hidden;
@@ -72,7 +73,7 @@
         /* 2. Parallel Column Layout */
         .data-columns {
             display: grid;
-            grid-template-columns: 1.3fr 0.7fr; 
+            grid-template-columns: 1.3fr 0.7fr;
             gap: 2mm;
             align-items: start;
         }
@@ -104,7 +105,7 @@
             <div class="label-header">
                 {{ l.physical_format_type }} - PLAY IN APPROPRIATE PLAYER
             </div>
-            
+
             <div class="label-body">
                 <div class="artist-line">{{ l.artist[:35] }}</div>
                 <div class="album-line">{{ l.album[:40] }}</div>
@@ -115,9 +116,9 @@
                         <div class="data-item"><span class="label-tag">CATALOGUE #:</span> {{ l.catalogue_number }}</div>
                         <div class="data-item"><span class="label-tag">ORIGINAL RELEASE:</span> {{ l.original_year }}</div>
                         <div class="data-item"><span class="label-tag">THIS VERSION YR:</span> {{ l.this_release_year }}</div>
-                        
+
                         <div class="data-item">
-                            <span class="label-tag">DURATION:</span> 
+                            <span class="label-tag">DURATION:</span>
                             {% if mode == 'MASTER' %}{{ l.this_release_duration }}{% else %}{{ l.duration }}{% endif %}
                         </div>
 
