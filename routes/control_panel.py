@@ -1,5 +1,10 @@
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from database import get_db_connection
+from datetime import datetime
+import pytz
+
+# Define the UK timezone
+uk_tz = pytz.timezone('Europe/London')
 
 def get_album_name_func():
     master_id = request.args.get('id')
@@ -49,7 +54,7 @@ def manage_albums_func():
         cursor.execute("SELECT album_id AS id, album FROM lookup_album ORDER BY album ASC")
         all_alb = cursor.fetchall()
         if request.method == 'POST' and q:
-            cursor.execute("SELECT album_id AS id, album FROM lookup_album WHERE album LIKE %s", (f"%{q}%",))
+            cursor.execute("SELECT album_id AS id, album WHERE album LIKE %s", (f"%{q}%",))
             res = cursor.fetchall()
     conn.close()
     return render_template('manage_albums.html', all_albums=all_alb, search_results=res, search_query=q)
@@ -162,16 +167,26 @@ def manage_interactions_func():
 
 def save_interaction_func():
     d = request.form
+    
+    # --- TIMEZONE FIX ---
+    # Get date from form. If it's missing, force London "Today".
+    form_date = d.get('interaction_date')
+    if not form_date or form_date.strip() == "":
+        form_date = datetime.now(uk_tz).strftime('%Y-%m-%d')
+    
     conn = get_db_connection()
     with conn.cursor() as cur:
         cur.execute("SELECT id FROM lookup_catalogue_no WHERE catalogue_number = %s", (d.get('cat_number'),))
         res = cur.fetchone()
         cat_id = res['id'] if res else None
-        v = (d.get('master_id'), d.get('interaction_date'), d.get('interaction_type'), cat_id, 
+        
+        # We use form_date here instead of d.get('interaction_date')
+        v = (d.get('master_id'), form_date, d.get('interaction_type'), cat_id,
              d.get('format_id'), d.get('bit_id') or None, d.get('sample_id') or None, d.get('comment'))
-        cur.execute("""INSERT INTO media_interaction_log 
-                    (master_release_entry_id, interaction_date, interaction_type_id, catalogue_no_id, 
-                    physical_format_type_id, bit_depth_id, sample_rate_id, individual_comment) 
+        
+        cur.execute("""INSERT INTO media_interaction_log
+                    (master_release_entry_id, interaction_date, interaction_type_id, catalogue_no_id,
+                    physical_format_type_id, bit_depth_id, sample_rate_id, individual_comment)
                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""", v)
         conn.commit()
         flash("SUCCESSFULLY LOGGED INTERACTION", "success")

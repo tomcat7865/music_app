@@ -1,7 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
 <div style="margin-bottom: 20px;">
-    <a href="/control_panel" style="color: #666; text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to Control Panel</a>
+    <a href="{{ url_for('reports_home') }}" style="color: #666; text-decoration: none;">
+        <i class="fas fa-arrow-left"></i> Back to Reports Menu
+    </a>
 </div>
 
 <div class="search-section">

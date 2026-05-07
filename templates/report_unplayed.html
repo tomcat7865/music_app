@@ -1,13 +1,15 @@
 {% extends "layout.html" %}
 {% block content %}
 <div style="margin-bottom: 20px;">
-    <a href="/control_panel" style="color: #666; text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to Control Panel</a>
+    <a href="{{ url_for('reports_home') }}" style="color: #666; text-decoration: none;">
+        <i class="fas fa-arrow-left"></i> Back to Reports & Labels
+    </a>
 </div>
 
 <div class="search-section">
     <h2 style="color: #666; margin-bottom: 10px; letter-spacing: 2px; font-size: 1.2rem;">UNPLAYED ALBUMS</h2>
     <p style="color: #444; font-size: 0.8rem; margin-bottom: 30px;">TOTAL: {{ data|length }} ITEMS</p>
-    
+
     <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
         <thead>
             <tr style="border-bottom: 2px solid #333; text-align: left; color: #444;">

@@ -13,12 +13,13 @@ from routes.reports_labels import (
     label_storage_selection_func, generate_storage_label_func,
     generate_inlay_func, report_top_100_func,
     report_unplayed_func, report_by_artist_func,
-    storage_master_batch_func, storage_version_batch_func
+    storage_master_batch_func, storage_version_batch_func,
+    report_latest_additions_func, report_todo_list_func  # All reports now included
 )
 from routes.data_entry import (
-    data_entry_home_func, manage_master_func, manage_version_func, 
+    data_entry_home_func, manage_master_func, manage_version_func,
     save_master_func, get_master_details_func,
-    save_version_func, get_version_details_func  # Added these two
+    save_version_func, get_version_details_func
 )
 
 app = Flask(__name__)
@@ -111,6 +112,12 @@ def report_unplayed(): return report_unplayed_func()
 
 @app.route('/reports/by_artist', methods=['GET', 'POST'])
 def report_by_artist(): return report_by_artist_func()
+
+@app.route('/reports/latest')
+def report_latest_additions(): return report_latest_additions_func()
+
+@app.route('/reports/todo')
+def report_todo_list(): return report_todo_list_func()
 
 # --- DATA ENTRY ---
 @app.route('/data_entry')

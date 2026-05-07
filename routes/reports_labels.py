@@ -22,10 +22,10 @@ def label_inlay_selection_func():
     conn = get_db_connection()
     with conn.cursor() as cursor:
         cursor.execute("""
-            SELECT m.id, art.artist, alb.album 
-            FROM master_release_entry m 
-            JOIN lookup_artist art ON m.artist_id = art.id 
-            JOIN lookup_album alb ON m.album_id = alb.album_id 
+            SELECT m.id, art.artist, alb.album
+            FROM master_release_entry m
+            JOIN lookup_artist art ON m.artist_id = art.id
+            JOIN lookup_album alb ON m.album_id = alb.album_id
             ORDER BY alb.album ASC
         """)
         masters = cursor.fetchall()
@@ -36,10 +36,10 @@ def label_storage_selection_func():
     conn = get_db_connection()
     with conn.cursor() as cursor:
         cursor.execute("""
-            SELECT m.id, art.artist, alb.album 
-            FROM master_release_entry m 
-            JOIN lookup_artist art ON m.artist_id = art.id 
-            JOIN lookup_album alb ON m.album_id = alb.album_id 
+            SELECT m.id, art.artist, alb.album
+            FROM master_release_entry m
+            JOIN lookup_artist art ON m.artist_id = art.id
+            JOIN lookup_album alb ON m.album_id = alb.album_id
             ORDER BY alb.album ASC
         """)
         masters = cursor.fetchall()
@@ -51,7 +51,7 @@ def generate_storage_label_func(master_id):
     with conn.cursor() as cursor:
         query = """
             SELECT m.id, art.artist, alb.album, cat.catalogue_number, loc.storage_location,
-                   fmt.physical_format_type, yr_orig.release_year AS original_year, 
+                   fmt.physical_format_type, yr_orig.release_year AS original_year,
                    m.this_release_year, m.this_release_duration, m.duration_less_bonus
             FROM master_release_entry m
             JOIN lookup_artist art ON m.artist_id = art.id
@@ -71,7 +71,7 @@ def generate_inlay_func(master_id):
     conn = get_db_connection()
     with conn.cursor() as cursor:
         master_query = """
-            SELECT 
+            SELECT
                 m.id, art.artist, alb.album, cat.catalogue_number,
                 fmt.physical_format_type, lab.label, m.average_dynamic_range,
                 yn_retail.yes_no AS retail_disc, yr_orig.release_year AS original_year,
@@ -95,10 +95,10 @@ def generate_inlay_func(master_id):
         master_data = cursor.fetchone()
 
         other_query = """
-            SELECT 
+            SELECT
                 ov.id, bd.bit_depth, sr.sample_rate, df.digital_format_type,
-                l.label, c.catalogue_number, yr.release_year AS this_release_year, 
-                pf.physical_format_type, ov.duration, ov.average_dynamic_range, 
+                l.label, c.catalogue_number, yr.release_year AS this_release_year,
+                pf.physical_format_type, ov.duration, ov.average_dynamic_range,
                 yn.yes_no AS booklet_available, ov.individual_comment
             FROM other_version_entry ov
             LEFT JOIN lookup_bit_depth bd ON ov.bit_depth_id = bd.id
@@ -130,7 +130,7 @@ def storage_master_batch_func():
     with conn.cursor() as cursor:
         query = """
             SELECT m.id, art.artist, alb.album, cat.catalogue_number, loc.storage_location,
-                   fmt.physical_format_type, yr_orig.release_year AS original_year, 
+                   fmt.physical_format_type, yr_orig.release_year AS original_year,
                    m.this_release_year, m.this_release_duration, m.duration_less_bonus
             FROM master_release_entry m
             JOIN lookup_artist art ON m.artist_id = art.id
@@ -148,24 +148,16 @@ def storage_master_batch_func():
 
 def storage_version_batch_func():
     conn = get_db_connection()
-    # Logic to parse the text box (e.g., 101-105, 110)
     ids = parse_id_list(request.form.get('id_list', ''))
-    if not ids: 
+    if not ids:
         return "NO VERSION IDS PROVIDED", 400
 
     with conn.cursor() as cursor:
-        # This query follows your "OTHER VERSION REQUIRED FIELDS" map exactly
         query = """
-            SELECT 
-                ov.id, 
-                art.artist, 
-                alb.album, 
-                cat.catalogue_number, 
-                loc.storage_location,
-                pf.physical_format_type, 
-                yr_orig.release_year AS original_year,
-                yr_this.release_year AS this_release_year, 
-                ov.duration
+            SELECT
+                ov.id, art.artist, alb.album, cat.catalogue_number, loc.storage_location,
+                pf.physical_format_type, yr_orig.release_year AS original_year,
+                yr_this.release_year AS this_release_year, ov.duration
             FROM other_version_entry ov
             JOIN master_release_entry m ON ov.master_release_entry_id = m.id
             JOIN lookup_artist art ON m.artist_id = art.id
@@ -175,14 +167,12 @@ def storage_version_batch_func():
             LEFT JOIN lookup_physical_format_type pf ON ov.physical_format_type_id = pf.id
             LEFT JOIN lookup_original_release_year yr_orig ON m.original_release_year_id = yr_orig.id
             LEFT JOIN lookup_original_release_year yr_this ON ov.this_release_year_id = yr_this.id
-            WHERE ov.id IN %s 
+            WHERE ov.id IN %s
             ORDER BY alb.album ASC
         """
         cursor.execute(query, (tuple(ids),))
         batch_data = cursor.fetchall()
     conn.close()
-    
-    # Template expects 'labels' and 'mode'
     return render_template('label_storage_print.html', labels=batch_data, mode='VERSION')
 
 def report_top_100_func():
@@ -190,46 +180,33 @@ def report_top_100_func():
     try:
         with conn.cursor() as cursor:
             query = """
-                SELECT 
-                    m.id AS master_id,
-                    art.artist, 
-                    alb.album,
-                    COUNT(l.id) AS play_count
+                SELECT m.id AS master_id, art.artist, alb.album, COUNT(l.id) AS play_count
                 FROM master_release_entry m
                 JOIN lookup_artist art ON m.artist_id = art.id
                 JOIN lookup_album alb ON m.album_id = alb.album_id
                 JOIN media_interaction_log l ON m.id = l.master_release_entry_id
                 WHERE l.interaction_type_id = 1
                 GROUP BY m.id, art.artist, alb.album
-                ORDER BY play_count DESC
-                LIMIT 100
+                ORDER BY play_count DESC LIMIT 100
             """
             cursor.execute(query)
             res = cursor.fetchall()
     finally:
         conn.close()
-    
-    # MATCH THE FILENAME HERE:
-    return render_template('report_top_listened.html',
-                           data=res,
-                           title="THE TOP 100 PLAYS")
+    return render_template('report_top_listened.html', data=res, title="THE TOP 100 PLAYS")
 
 def report_unplayed_func():
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
-            # CORRECTED: Using 'album_id' for the join as per your DB structure
             query = """
-                SELECT 
-                    m.id AS master_id, 
-                    art.artist, 
-                    alb.album
+                SELECT m.id AS master_id, art.artist, alb.album
                 FROM master_release_entry m
                 JOIN lookup_artist art ON m.artist_id = art.id
                 JOIN lookup_album alb ON m.album_id = alb.album_id
                 WHERE m.id NOT IN (
-                    SELECT DISTINCT master_release_entry_id 
-                    FROM media_interaction_log 
+                    SELECT DISTINCT master_release_entry_id
+                    FROM media_interaction_log
                     WHERE interaction_type_id = 1
                 )
                 ORDER BY art.artist ASC, alb.album ASC
@@ -238,38 +215,72 @@ def report_unplayed_func():
             res = cursor.fetchall()
     finally:
         conn.close()
-    
-    return render_template('report_unplayed.html',
-                           data=res,
-                           title="THE UNPLAYED GEMS")
+    return render_template('report_unplayed.html', data=res, title="THE UNPLAYED GEMS")
 
 def report_by_artist_func():
     conn = get_db_connection()
     selected_artist_id = request.form.get('artist_id')
     data, artists = [], []
     with conn.cursor() as cursor:
-        # 1. Get the list of artists for the dropdown
         cursor.execute("SELECT id, artist FROM lookup_artist ORDER BY artist ASC")
         artists = cursor.fetchall()
-        
-        # 2. If an artist is selected, get their full release data
         if selected_artist_id:
             cursor.execute("""
-                SELECT art.artist, alb.album, cat.catalogue_number, fmt.physical_format_type 
-                FROM master_release_entry m 
-                JOIN lookup_artist art ON m.artist_id = art.id 
-                JOIN lookup_album alb ON m.album_id = alb.album_id 
-                LEFT JOIN lookup_catalogue_no cat ON m.catalogue_no_id = cat.id 
-                LEFT JOIN lookup_physical_format_type fmt ON m.physical_format_type_id = fmt.id 
-                WHERE art.id = %s 
-                ORDER BY alb.album ASC
+                SELECT art.artist, alb.album, cat.catalogue_number, fmt.physical_format_type
+                FROM master_release_entry m
+                JOIN lookup_artist art ON m.artist_id = art.id
+                JOIN lookup_album alb ON m.album_id = alb.album_id
+                LEFT JOIN lookup_catalogue_no cat ON m.catalogue_no_id = cat.id
+                LEFT JOIN lookup_physical_format_type fmt ON m.physical_format_type_id = fmt.id
+                WHERE art.id = %s ORDER BY alb.album ASC
             """, (selected_artist_id,))
             data = cursor.fetchall()
-            
     conn.close()
-    # Passing 'data' to match your template loop and 'selected_id' for the dropdown state
-    return render_template('report_by_artist.html', 
-                           data=data, 
-                           artists=artists, 
-                           selected_id=selected_artist_id,
-                           title="ALBUMS BY ARTIST")
+    return render_template('report_by_artist.html', data=data, artists=artists, selected_id=selected_artist_id, title="ALBUMS BY ARTIST")
+
+def report_latest_additions_func():
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            query = """
+                SELECT m.id, art.artist, alb.album, lab.label, cat.catalogue_number, fmt.physical_format_type, 
+                       yr_orig.release_year AS original_year, m.this_release_year, loc.storage_location
+                FROM master_release_entry m
+                JOIN lookup_artist art ON m.artist_id = art.id
+                JOIN lookup_album alb ON m.album_id = alb.album_id
+                LEFT JOIN lookup_label lab ON m.label_id = lab.id
+                LEFT JOIN lookup_catalogue_no cat ON m.catalogue_no_id = cat.id
+                LEFT JOIN lookup_physical_format_type fmt ON m.physical_format_type_id = fmt.id
+                LEFT JOIN lookup_original_release_year yr_orig ON m.original_release_year_id = yr_orig.id
+                LEFT JOIN lookup_storage_location loc ON m.storage_location_id = loc.id
+                ORDER BY m.id DESC LIMIT 100
+            """
+            cursor.execute(query)
+            res = cursor.fetchall()
+    finally:
+        conn.close()
+    return render_template('report_latest_additions.html', data=res, title="LATEST ADDITIONS")
+
+def report_todo_list_func():
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            query = """
+                SELECT l.interaction_date, art.artist, alb.album, cat.catalogue_number,
+                       fmt.physical_format_type, loc.storage_location, l.individual_comment,
+                       l.master_release_entry_id
+                FROM media_interaction_log l
+                JOIN master_release_entry m ON l.master_release_entry_id = m.id
+                JOIN lookup_artist art ON m.artist_id = art.id
+                JOIN lookup_album alb ON m.album_id = alb.album_id
+                LEFT JOIN lookup_catalogue_no cat ON l.catalogue_no_id = cat.id
+                LEFT JOIN lookup_physical_format_type fmt ON m.physical_format_type_id = fmt.id
+                LEFT JOIN lookup_storage_location loc ON m.storage_location_id = loc.id
+                WHERE l.interaction_type_id = 4
+                ORDER BY l.interaction_date ASC
+            """
+            cursor.execute(query)
+            res = cursor.fetchall()
+    finally:
+        conn.close()
+    return render_template('report_todo_list.html', data=res, title="ARCHIVE TO-DO LIST")
