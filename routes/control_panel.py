@@ -1,10 +1,50 @@
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from database import get_db_connection
-from datetime import datetime
+from datetime import date, datetime
 import pytz
 
 # Define the UK timezone
 uk_tz = pytz.timezone('Europe/London')
+
+# --- NEW: API FOR LOGGED INTERACTION DATA RETRIEVAL ---
+def get_interaction_details_func():
+    int_id = request.args.get('id')
+    if not int_id:
+        return jsonify({"error": "No ID provided"}), 400
+
+    conn = get_db_connection()
+    with conn.cursor() as cursor:
+        # Pull everything out of the log
+        cursor.execute("SELECT * FROM media_interaction_log WHERE id = %s", (int_id,))
+        result = cursor.fetchone()
+
+        if result:
+            # Format Python date type to HTML date input format string
+            if isinstance(result.get('interaction_date'), date):
+                result['interaction_date'] = result['interaction_date'].strftime('%Y-%m-%d')
+            
+            # Fetch human identities for safety confirmation headings
+            cursor.execute("""
+                SELECT art.artist, alb.album 
+                FROM master_release_entry m
+                JOIN lookup_artist art ON m.artist_id = art.id
+                JOIN lookup_album alb ON m.album_id = alb.album_id
+                WHERE m.id = %s
+            """, (result['master_release_entry_id'],))
+            names = cursor.fetchone()
+            if names:
+                result.update(names)
+
+            # Get the string-value catalogue number text to fill the autocomplete input
+            if result.get('catalogue_no_id'):
+                cursor.execute("SELECT catalogue_number FROM lookup_catalogue_no WHERE id = %s", (result['catalogue_no_id'],))
+                cat_row = cursor.fetchone()
+                if cat_row:
+                    result['cat_number'] = cat_row['catalogue_number']
+
+    conn.close()
+    return jsonify(result) if result else jsonify({"error": "Not found"}), 404
+
 
 def get_album_name_func():
     master_id = request.args.get('id')
@@ -167,30 +207,63 @@ def manage_interactions_func():
 
 def save_interaction_func():
     d = request.form
+    int_id = d.get('id') # Pull the validation key
     
-    # --- TIMEZONE FIX ---
-    # Get date from form. If it's missing, force London "Today".
+    # --- TIMEZONE CHECK ---
     form_date = d.get('interaction_date')
     if not form_date or form_date.strip() == "":
         form_date = datetime.now(uk_tz).strftime('%Y-%m-%d')
     
     conn = get_db_connection()
-    with conn.cursor() as cur:
-        cur.execute("SELECT id FROM lookup_catalogue_no WHERE catalogue_number = %s", (d.get('cat_number'),))
-        res = cur.fetchone()
-        cat_id = res['id'] if res else None
-        
-        # We use form_date here instead of d.get('interaction_date')
-        v = (d.get('master_id'), form_date, d.get('interaction_type'), cat_id,
-             d.get('format_id'), d.get('bit_id') or None, d.get('sample_id') or None, d.get('comment'))
-        
-        cur.execute("""INSERT INTO media_interaction_log
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id FROM lookup_catalogue_no WHERE catalogue_number = %s", (d.get('cat_number'),))
+            res = cur.fetchone()
+            cat_id = res['id'] if res else None
+            
+            # Form fields mapped to DB attributes
+            values = (
+                d.get('master_id'), 
+                form_date, 
+                d.get('interaction_type'), 
+                cat_id,
+                d.get('format_id'), 
+                d.get('bit_id') or None, 
+                d.get('sample_id') or None, 
+                d.get('comment')
+            )
+            
+            # Direct switch: Update entry if row exists, otherwise insert a new record
+            if int_id and int_id.strip() and int_id.isdigit():
+                sql = """
+                    UPDATE media_interaction_log SET
+                        master_release_entry_id = %s,
+                        interaction_date = %s,
+                        interaction_type_id = %s,
+                        catalogue_no_id = %s,
+                        physical_format_type_id = %s,
+                        bit_depth_id = %s,
+                        sample_rate_id = %s,
+                        individual_comment = %s
+                    WHERE id = %s
+                """
+                cur.execute(sql, values + (int_id,))
+                flash(f"SUCCESSFULLY UPDATED INTERACTION: ID {int_id}", "success")
+            else:
+                sql = """
+                    INSERT INTO media_interaction_log
                     (master_release_entry_id, interaction_date, interaction_type_id, catalogue_no_id,
                     physical_format_type_id, bit_depth_id, sample_rate_id, individual_comment)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""", v)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+                """
+                cur.execute(sql, values)
+                flash("SUCCESSFULLY LOGGED NEW INTERACTION", "success")
         conn.commit()
-        flash("SUCCESSFULLY LOGGED INTERACTION", "success")
-    conn.close()
+    except Exception as e:
+        conn.rollback()
+        flash(f"DATABASE ERROR: {str(e)}", "danger")
+    finally:
+        conn.close()
     return redirect(url_for('manage_interactions'))
 
 # --- MEDIA SPECS ---

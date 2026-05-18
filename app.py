@@ -6,7 +6,8 @@ from routes.control_panel import (
     save_label_func, manage_locations_func, save_location_func,
     manage_catalogue_numbers_func, save_catalogue_number_func,
     manage_interactions_func, save_interaction_func,
-    manage_media_specs_func, save_media_spec_func, get_album_name_func
+    manage_media_specs_func, save_media_spec_func, get_album_name_func,
+    get_interaction_details_func  # Added to the import list
 )
 from routes.reports_labels import (
     reports_home_func, label_inlay_selection_func,
@@ -14,7 +15,7 @@ from routes.reports_labels import (
     generate_inlay_func, report_top_100_func,
     report_unplayed_func, report_by_artist_func,
     storage_master_batch_func, storage_version_batch_func,
-    report_latest_additions_func, report_todo_list_func  # All reports now included
+    report_latest_additions_func, report_todo_list_func
 )
 from routes.data_entry import (
     data_entry_home_func, manage_master_func, manage_version_func,
@@ -39,6 +40,10 @@ def control_panel_home(): return control_panel_home_func()
 
 @app.route('/api/get_album_name')
 def get_album_name(): return get_album_name_func()
+
+# NEW: API ENDPOINT FOR RETRIEVING LOG DETAILS
+@app.route('/api/get_interaction_details')
+def get_interaction_details(): return get_interaction_details_func()
 
 @app.route('/control_panel/artists', methods=['GET', 'POST'])
 def manage_artists(): return manage_artists_func()

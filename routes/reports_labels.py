@@ -70,6 +70,8 @@ def generate_storage_label_func(master_id):
 def generate_inlay_func(master_id):
     conn = get_db_connection()
     with conn.cursor() as cursor:
+        # FIXED: Added code.bdr_dvdr_code AS dvdr_code to the SELECT block
+        # FIXED: Corrected the final LEFT JOIN to include lookup_bdr_dvdr_code mapped as 'code'
         master_query = """
             SELECT
                 m.id, art.artist, alb.album, cat.catalogue_number,
@@ -77,6 +79,7 @@ def generate_inlay_func(master_id):
                 yn_retail.yes_no AS retail_disc, yr_orig.release_year AS original_year,
                 m.this_release_duration, br_cdr.disc_brand AS cdr_brand, cc.cdr_code,
                 m.this_release_year, m.duration_less_bonus, br_dvd.disc_brand AS dvdr_brand,
+                code.bdr_dvdr_code AS dvdr_code,
                 m.disc_creation_date, m.side_change_point, m.notes_1, m.notes_2, m.notes_3
             FROM master_release_entry m
             LEFT JOIN lookup_artist art ON m.artist_id = art.id
@@ -89,6 +92,7 @@ def generate_inlay_func(master_id):
             LEFT JOIN lookup_disc_brand br_cdr ON m.cdr_brand_id = br_cdr.id
             LEFT JOIN lookup_cdr_code cc ON m.cdr_code_id = cc.id1
             LEFT JOIN lookup_disc_brand br_dvd ON m.dvdr_brand_id = br_dvd.id
+            LEFT JOIN lookup_bdr_dvdr_code code ON m.dvdr_code_id = code.id
             WHERE m.id = %s
         """
         cursor.execute(master_query, (master_id,))

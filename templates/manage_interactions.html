@@ -1,206 +1,158 @@
 {% extends "layout.html" %}
 {% block content %}
-<style>
-    /* 1. UNIFIED INPUT STYLE */
-    input, select, textarea {
-        -webkit-appearance: none;
-        appearance: none;
-        box-sizing: border-box !important;
-        width: 100%;
-        height: 40px;
-        background: #222;
-        color: #eee;
-        border: 1px solid #444;
-        border-radius: 4px;
-        padding: 0 10px;
-        font-family: inherit;
-        font-size: 0.9rem;
-        display: block;
-    }
-
-    /* 2. CUSTOM SEARCH DROPDOWN (Strict Alignment) */
-    .search-container {
-        position: relative; 
-        width: 100%;
-        box-sizing: border-box; /* Keeps it inside the grey area */
-    }
-
-    #custom_cat_results {
-        position: absolute;
-        top: 100%; 
-        left: 0;
-        width: 100%;
-        background: #2a2a2a;
-        border: 1px solid #444;
-        border-top: none;
-        z-index: 999;
-        max-height: 200px;
-        overflow-y: auto;
-        display: none; 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    }
-
-    .search-item {
-        padding: 10px;
-        cursor: pointer;
-        border-bottom: 1px solid #333;
-        font-size: 0.85rem;
-    }
-    .search-item:hover { background: #333; color: #28a745; }
-
-    /* 3. THE GRID (Vertical Sync) */
-    .grid-container {
-        display: grid; 
-        grid-template-columns: 1fr 1fr; 
-        gap: 20px;
-        /* Remove 'align-items: end' to keep labels and boxes naturally aligned */
-    }
-
-    label {
-        color: #666;
-        font-size: 0.7rem;
-        display: block;
-        margin-bottom: 8px;
-        letter-spacing: 1px;
-        height: 14px; /* Force identical label height for vertical sync */
-    }
-
-    #album_display {
-        height: 40px;
-        background: #1a1a1a;
-        color: #888;
-        border: 1px solid #333;
-        border-radius: 4px;
-        padding: 0 10px;
-        box-sizing: border-box;
-        display: flex;
-        align-items: center;
-        font-size: 0.9rem;
-    }
-</style>
-
 <div style="margin-bottom: 20px;">
-    <a href="/control_panel" style="color: #666; text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to Control Panel</a>
+    <a href="/control_panel" style="color: #666; text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to Control Panel Menu</a>
 </div>
 
-<div class="search-section">
-    <h2 style="color: #28a745; margin-bottom: 20px; letter-spacing: 2px; font-size: 1.2rem;">LOG MEDIA INTERACTION</h2>
-    
-    <form action="{{ url_for('save_interaction') }}" method="post" autocomplete="off">
-        <div class="grid-container">
-            
-            <div>
-                <label>MASTER RELEASE ID / DATE</label>
-                <div style="display: flex; gap: 20px;">
-                    <div style="flex: 1;"><input type="number" name="master_id" id="master_id" required></div>
-                    <div style="flex: 1;"><input type="date" name="interaction_date" id="interaction_date" required></div>
-                </div>
-            </div>
+<div class="search-section" style="max-width: 1100px; margin: 0 auto; background: #1a1a1a; padding: 30px; border-radius: 8px; border: 1px solid #333;">
+    <h2 style="color: #28a745; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;">Log Media Interaction</h2>
+    <p style="color: #666; font-size: 0.8rem; margin-bottom: 30px;">Enter an Interaction Log ID to update, or keep blank to save a new record entry.</p>
 
-            <div>
-                <label style="color: #28a745;">CORRESPONDING ALBUM</label>
-                <div id="album_display">Enter ID to look up...</div>
-            </div>
+    <form action="/control_panel/interactions/save" method="POST">
 
+        <div style="display: grid; grid-template-columns: 160px 120px 1fr 1fr; gap: 15px; background: #000; padding: 20px; border-radius: 4px; border: 1px solid #222; margin-bottom: 30px; align-items: end;">
             <div>
-                <label>INTERACTION TYPE</label>
-                <select name="interaction_type" required>
+                <label style="display:block; color:#28a745; font-size:0.7rem; font-weight:bold; margin-bottom:5px;">LOG ID (TO EDIT)</label>
+                <input type="number" name="id" id="lookup_interaction_id" placeholder="Auto-New" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; border-radius:4px;">
+            </div>
+            <div>
+                <button type="button" id="load_interaction_btn" style="width:100%; padding:10px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.7rem; height:38px; text-transform: uppercase;">LOAD</button>
+            </div>
+            <div>
+                <label style="display:block; color:#666; font-size:0.7rem; font-weight:bold; margin-bottom:5px;">TARGET ARTIST</label>
+                <div id="display_int_artist" style="padding:10px; color:#aaa; font-style:italic; border-bottom: 1px solid #222;">--</div>
+            </div>
+            <div>
+                <label style="display:block; color:#666; font-size:0.7rem; font-weight:bold; margin-bottom:5px;">ALBUM CONFIRMATION</label>
+                <div id="display_int_album" style="padding:10px; color:#aaa; font-style:italic; border-bottom: 1px solid #222;">--</div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 150px 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div>
+                <label style="display:block; color:#888; font-size:0.7rem; margin-bottom:5px;">MASTER RELEASE ID</label>
+                <input type="number" name="master_id" id="master_release_entry_id" required style="width:100%; padding:10px; background:#000; border:1px solid #333; color:#fff; box-sizing: border-box;">
+            </div>
+            <div>
+                <label style="display:block; color:#888; font-size:0.7rem; margin-bottom:5px;">INTERACTION DATE</label>
+                <input type="date" name="interaction_date" id="interaction_date" style="width:100%; padding:10px; background:#000; border:1px solid #333; color:#fff; height: 38px; box-sizing: border-box;">
+            </div>
+            <div>
+                <label style="display:block; color:#888; font-size:0.7rem; margin-bottom:5px;">INTERACTION TYPE</label>
+                <select name="interaction_type" id="interaction_type_id" required style="width:100%; padding:10px; background:#000; border:1px solid #333; color:#eee; height: 38px;">
+                    <option value="">-- Select Type --</option>
                     {% for t in types %}
                     <option value="{{ t.id }}">{{ t.interaction_type }}</option>
                     {% endfor %}
                 </select>
             </div>
-            
-            <div class="search-container">
-                <label>CATALOGUE #</label>
-                <input type="text" name="cat_number" id="cat_input" placeholder="Start typing...">
-                <div id="custom_cat_results"></div>
-            </div>
+        </div>
 
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;">
             <div>
-                <label>PHYSICAL FORMAT</label>
-                <select name="format_id">
+                <label style="display:block; color:#888; font-size:0.7rem; margin-bottom:5px;">CATALOGUE NUMBER (AUTO)</label>
+                <input type="text" name="cat_number" id="cat_number" list="cats_list" style="width:100%; padding:10px; background:#000; border:1px solid #333; color:#fff; box-sizing: border-box;">
+                <datalist id="cats_list">
+                    {% for c in cats %}
+                    <option value="{{ c.catalogue_number }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div>
+                <label style="display:block; color:#888; font-size:0.7rem; margin-bottom:5px;">PHYSICAL FORMAT</label>
+                <select name="format_id" id="physical_format_type_id" required style="width:100%; padding:10px; background:#000; border:1px solid #333; color:#eee;">
+                    <option value="">-- Select Format --</option>
                     {% for f in formats %}
                     <option value="{{ f.id }}">{{ f.physical_format_type }}</option>
                     {% endfor %}
                 </select>
             </div>
-            
             <div>
-                <label>BIT DEPTH / SAMPLE RATE</label>
-                <div style="display: flex; gap: 10px;">
-                    <div style="flex: 1;">
-                        <select name="bit_id">
-                            <option value="">N/A</option>
-                            {% for b in bits %}<option value="{{ b.id }}">{{ b.bit_depth }}</option>{% endfor %}
-                        </select>
-                    </div>
-                    <div style="flex: 1;">
-                        <select name="sample_id">
-                            <option value="">N/A</option>
-                            {% for s in rates %}<option value="{{ s.id }}">{{ s.sample_rate }}</option>{% endfor %}
-                        </select>
-                    </div>
-                </div>
+                <label style="display:block; color:#888; font-size:0.7rem; margin-bottom:5px;">BIT DEPTH</label>
+                <select name="bit_id" id="bit_depth_id" style="width:100%; padding:10px; background:#000; border:1px solid #333; color:#eee;">
+                    <option value="">-- N/A --</option>
+                    {% for b in bits %}
+                    <option value="{{ b.id }}">{{ b.bit_depth }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label style="display:block; color:#888; font-size:0.7rem; margin-bottom:5px;">SAMPLE RATE</label>
+                <select name="sample_id" id="sample_rate_id" style="width:100%; padding:10px; background:#000; border:1px solid #333; color:#eee;">
+                    <option value="">-- N/A --</option>
+                    {% for s in rates %}
+                    <option value="{{ s.id }}">{{ s.sample_rate }}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
 
-        <div style="margin-top: 20px;">
-            <label>INDIVIDUAL COMMENT</label>
-            <textarea name="comment" style="height: 80px; padding: 10px; width: 100%;"></textarea>
+        <div style="margin-bottom: 30px;">
+            <label style="display:block; color:#888; font-size:0.7rem; margin-bottom:10px; text-transform: uppercase;">Individual Comment / Status Details</label>
+            <textarea name="comment" id="individual_comment" rows="4" placeholder="Enter session notes, play evaluations, or action descriptions..." style="width:100%; padding:10px; background:#000; border:1px solid #333; color:#fff; border-radius:4px; font-family:inherit; resize: vertical;"></textarea>
         </div>
 
-        <button type="submit" class="btn" style="margin-top: 20px; width: 100%; padding: 15px;">SAVE INTERACTION</button>
+        <button type="submit" style="width: 100%; background: #28a745; color: white; border: none; padding: 18px; cursor: pointer; border-radius: 4px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">
+            Commit Interaction to Log
+        </button>
     </form>
 </div>
 
 <script>
-const allCats = [{% for c in cats %}"{{ c.catalogue_number }}",{% endfor %}];
-const catInput = document.getElementById('cat_input');
-const catResults = document.getElementById('custom_cat_results');
+// 1. MANUALLY LOAD INTERACTION BY EXPLICIT ID CHECK
+document.getElementById('load_interaction_btn').addEventListener('click', function() {
+    const intId = document.getElementById('lookup_interaction_id').value;
+    if (!intId) { alert("Please enter an Interaction Log ID first"); return; }
 
-catInput.addEventListener('input', function() {
-    const val = this.value.toLowerCase();
-    catResults.innerHTML = '';
-    if (val.length < 1) { catResults.style.display = 'none'; return; }
-    const filtered = allCats.filter(c => c.toLowerCase().includes(val)).slice(0, 10);
-    if (filtered.length > 0) {
-        filtered.forEach(item => {
-            const div = document.createElement('div');
-            div.classList.add('search-item');
-            div.innerText = item;
-            div.onclick = function() {
-                catInput.value = item;
-                catResults.style.display = 'none';
-            };
-            catResults.appendChild(div);
-        });
-        catResults.style.display = 'block';
-    } else { catResults.style.display = 'none'; }
+    fetch(`/api/get_interaction_details?id=${intId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert("Interaction ID not found in database");
+                return;
+            }
+
+            // Populate Safety Headers
+            document.getElementById('display_int_artist').innerText = data.artist || "Unknown Artist";
+            document.getElementById('display_int_album').innerText = data.album || "Unknown Album";
+            document.getElementById('display_int_artist').style.color = '#28a745';
+
+            // Automatically map keys straight to field IDs
+            for (let key in data) {
+                let el = document.getElementById(key);
+                if (el) {
+                    el.value = data[key];
+                }
+            }
+        })
+        .catch(err => console.error("Interaction Load Error:", err));
 });
 
-document.addEventListener('click', (e) => {
-    if (!catInput.contains(e.target)) catResults.style.display = 'none';
-});
+// 2. LIVE SEARCH FEEDBACK WHILE TYPING MASTER ID
+document.getElementById('master_release_entry_id').addEventListener('input', function() {
+    const mId = this.value;
+    const artistBox = document.getElementById('display_int_artist');
+    const albumBox = document.getElementById('display_int_album');
 
-document.getElementById('master_id').addEventListener('input', function() {
-    const mid = this.value;
-    const display = document.getElementById('album_display');
-    if (mid.length > 0) {
-        fetch(`/api/get_album_name?id=${mid}`)
-            .then(response => response.json())
+    if (mId.length > 0) {
+        fetch(`/api/get_master_details?id=${mId}`)
+            .then(res => res.json())
             .then(data => {
-                display.innerText = data.album;
-                display.style.color = (data.album === 'ID NOT FOUND') ? '#d9534f' : '#28a745';
+                if (data.album) {
+                    artistBox.innerText = data.artist;
+                    albumBox.innerText = data.album;
+                    artistBox.style.color = '#28a745';
+                } else {
+                    artistBox.innerText = "Master ID Not Found";
+                    albumBox.innerText = "--";
+                    artistBox.style.color = '#666';
+                }
             });
     } else {
-        display.innerText = 'Enter ID to look up...';
-        display.style.color = '#888';
+        artistBox.innerText = "--";
+        albumBox.innerText = "--";
+        artistBox.style.color = '#aaa';
     }
-});
-
-window.addEventListener('load', () => {
-    document.getElementById('interaction_date').value = new Date().toISOString().split('T')[0];
 });
 </script>
 {% endblock %}
